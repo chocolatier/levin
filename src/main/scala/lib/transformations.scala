@@ -1,18 +1,43 @@
 package levin
 
 import smtlib._
+import smtlib.trees.Commands._
+import smtlib.trees.Terms._
+
 import scala.collection.mutable.ListBuffer
 
 package object Transformations {
 
-    // TODO: Write function that converts a tree of ands to a list of commands
+    /**
+    * Splits an expression into a series of expressions.
+    */
     def andToVec (x: smtlib.parser.Parser) = {
-
+      var common = new ListBuffer[smtlib.trees.Commands.Command]
+      var toSplit = new ListBuffer[smtlib.trees.Commands.Command]
+      var cmd = x.parseCommand
+      cmd.getClass.getMethods.map(_.getName)
+      while (cmd != null){
+        // if (cmd.tpe != 2)
+        //   common.append(cmd)
+        cmd match {
+          case Assert (term) => createDisjointAssertions(term)
+          case _ => common.append(cmd)
+        }
+        cmd = x.parseCommand
+      }
+      common
     }
 
-    // TODO: Write function to strip let statements from a command
-    def stripDeclarations(x: smtlib.trees.Commands.Command) = {
-
+    def createDisjointAssertions (expr : SExpr) : Seq[SExpr] = {
+      expr match {
+        // XXX: Just stripping the declaration away. Will need to be fixed
+        // if the disjoint list of assertions is to be used in any way.
+        case Let (vars, seqVars, t) => createDisjointAssertions(t)
+        case FunctionApplication(QualifiedIdentifier(Identifier(SSymbol("and"),_),_), terms) => {
+          terms.flatMap(createDisjointAssertions)
+        }
+        case x => {
+          x::Nil}
+      }
     }
-
 }

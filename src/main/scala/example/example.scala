@@ -7,7 +7,7 @@ object Example {
     val lexer = new smtlib.lexer.Lexer(is)
     val parser = new smtlib.parser.Parser(lexer)
 
-    println(parser.parseScript)
+    println(levin.Transformations.andToVec(parser))
 
   }
 }
