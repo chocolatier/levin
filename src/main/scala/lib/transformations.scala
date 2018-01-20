@@ -10,6 +10,7 @@ package object Transformations {
 
     /**
     * Splits an expression into a series of expressions.
+    * TODO: Return a valid list of expressions.
     */
     def andToVec (x: smtlib.parser.Parser) = {
       var common = new ListBuffer[smtlib.trees.Commands.Command]
@@ -17,8 +18,6 @@ package object Transformations {
       var cmd = x.parseCommand
       cmd.getClass.getMethods.map(_.getName)
       while (cmd != null){
-        // if (cmd.tpe != 2)
-        //   common.append(cmd)
         cmd match {
           case Assert (term) => createDisjointAssertions(term)
           case _ => common.append(cmd)
