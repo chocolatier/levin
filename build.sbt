@@ -1,5 +1,7 @@
 import Dependencies._
 
+libraryDependencies += "com.regblanc" %% "scala-smtlib" % "0.2.2"
+
 lazy val root = (project in file(".")).
   settings(
     inThisBuild(List(
@@ -9,5 +11,4 @@ lazy val root = (project in file(".")).
     )),
     name := "Hello",
     libraryDependencies += scalaTest % Test,
-    libraryDependencies += "com.regblanc" %% "scala-smtlib" % "0.2.2"  
 )
