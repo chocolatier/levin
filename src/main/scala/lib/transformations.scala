@@ -10,28 +10,53 @@ package object Transformations {
 
     /**
     * Splits an expression into a series of expressions.
-    * TODO: Return a valid list of expressions.
+    * XXX: Replace this imperetive BS with functional code.
     */
     def andToVec (x: smtlib.parser.Parser) = {
-      var common = new ListBuffer[smtlib.trees.Commands.Command]
-      var toSplit = new ListBuffer[smtlib.trees.Commands.Command]
+      var common = new ListBuffer[ListBuffer[Command]]
+      common.append(new ListBuffer[Command])
       var cmd = x.parseCommand
-      cmd.getClass.getMethods.map(_.getName)
       while (cmd != null){
         cmd match {
-          case Assert (term) => createDisjointAssertions(term)
-          case _ => common.append(cmd)
+          case Assert (term) => {
+            val letFcn = createLetFcn(term)
+            val strippedLets = stripLets(term)
+            val disjointTerms = createDisjointAssertions (strippedLets)
+            disjointTerms.map(letFcn).map(Assert).foreach(println)
+            for (c <- common){
+              common -= c
+              for (d <- disjointTerms.map(letFcn).map(Assert)) {
+                var e = c.clone
+                e.append(d)
+                common.append(e)
+              }
+            }
+          }
+          case _ => common.foreach(_.append(cmd))
         }
         cmd = x.parseCommand
       }
       common
     }
 
-    def createDisjointAssertions (expr : SExpr) : Seq[SExpr] = {
+    def createLetFcn (term: Term) : Term => Term = {
+      term match {
+        case Let (vars, seqVars, x) => (Let (vars, seqVars, _:Term)) compose (createLetFcn(x))
+        case _ => identity
+      }
+
+    }
+
+    def stripLets (expr : Term) : Term = {
       expr match {
-        // XXX: Just stripping the declaration away. Will need to be fixed
-        // if the disjoint list of assertions is to be used in any way.
-        case Let (vars, seqVars, t) => createDisjointAssertions(t)
+        case Let (_, _, t) => stripLets (t)
+        case _ => expr
+      }
+    }
+
+    def createDisjointAssertions (expr : Term) : Seq[Term] = {
+      expr match {
+        // gross
         case FunctionApplication(QualifiedIdentifier(Identifier(SSymbol("and"),_),_), terms) => {
           terms.flatMap(createDisjointAssertions)
         }
