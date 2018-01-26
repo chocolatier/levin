@@ -59,8 +59,7 @@ package object Transformations {
         case FunctionApplication(QualifiedIdentifier(Identifier(SSymbol("and"),_),_), terms) => {
           terms.flatMap(createDisjointAssertions)
         }
-        case x => {
-          x::Nil}
+        case x => x::Nil
       }
     }
 }
