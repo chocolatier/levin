@@ -22,7 +22,6 @@ package object Transformations {
             val letFcn = createLetFcn(term)
             val strippedLets = stripLets(term)
             val disjointTerms = createDisjointAssertions (strippedLets)
-            disjointTerms.map(letFcn).map(Assert).foreach(println)
             for (c <- common){
               common -= c
               for (d <- disjointTerms.map(letFcn).map(Assert)) {
