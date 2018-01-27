@@ -38,6 +38,8 @@ package object Transformations {
       common
     }
 
+    // Creates an higher order function can be used to 
+    // let statements ti a term 
     def createLetFcn (term: Term) : Term => Term = {
       term match {
         case Let (vars, seqVars, x) => (Let (vars, seqVars, _:Term)) compose (createLetFcn(x))
@@ -46,6 +48,7 @@ package object Transformations {
 
     }
 
+    // Removes the let statements from a term
     def stripLets (expr : Term) : Term = {
       expr match {
         case Let (_, _, t) => stripLets (t)
@@ -53,6 +56,7 @@ package object Transformations {
       }
     }
 
+    // Splits a series of ands, forming a sequence of terms
     def createDisjointAssertions (expr : Term) : Seq[Term] = {
       expr match {
         // gross
