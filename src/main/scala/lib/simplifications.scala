@@ -6,10 +6,10 @@ import smtlib.trees.Terms._
 
 
 package object simplifications {
-    def deExt (t : Term) : Term = {
+    def removeExt (t : Term) : Term = {
         t match {
             case Let (vars, seqVars, ts) => {
-                Let (deExtHelper(vars), seqVars.map(deExtHelper), deExt(ts))
+                Let (removeExtVarBinding(vars), seqVars.map(removeExtVarBinding), removeExt(ts))
                 }
             case _ => t
         }
@@ -17,15 +17,15 @@ package object simplifications {
 
 
     // TODO: Better naming....
-    def deExtHelper (t : VarBinding) : VarBinding = {
+    def removeExtVarBinding (t : VarBinding) : VarBinding = {
         t match {
-            case VarBinding (v, b) => VarBinding (v, deExtHelperHelper(b))
+            case VarBinding (v, b) => VarBinding (v, stripExtApplication(b))
             case _ => t
         }
     }
 
     // TODO : Better naming...
-    def deExtHelperHelper (t: Term) : Term = { 
+    def stripExtApplication (t: Term) : Term = { 
         t match {
             // S/ZExt are only applied to a single term
             case FunctionApplication (QualifiedIdentifier(Identifier(SSymbol("zero_extend"),_),_), terms) => terms(0)

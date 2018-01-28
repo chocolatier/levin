@@ -15,7 +15,7 @@ object Example {
   while (cmd != null){
     cmd match {
             case Assert (term) => {
-              println(simplifications.deExt(term))
+              println(simplifications.removeExt(term))
               }
             case _ => println("as")
           }
