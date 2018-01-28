@@ -1,5 +1,9 @@
 import levin._
 
+import smtlib._
+import smtlib.trees.Commands._
+import smtlib.trees.Terms._
+
 // Example usage of levin. (Actually just quick and dirty testing).
 object Example {
   def main (args: Array[String]): Unit = {
@@ -7,7 +11,15 @@ object Example {
     val lexer = new smtlib.lexer.Lexer(is)
     val parser = new smtlib.parser.Parser(lexer)
 
-    println(levin.Transformations.andToVec(parser))
-
+  var cmd = parser.parseCommand
+  while (cmd != null){
+    cmd match {
+            case Assert (term) => {
+              println(simplifications.deExt(term))
+              }
+            case _ => println("as")
+          }
+    cmd = parser.parseCommand
+    }
   }
 }
