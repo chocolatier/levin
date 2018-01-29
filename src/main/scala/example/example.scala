@@ -3,6 +3,7 @@ import levin._
 import smtlib._
 import smtlib.trees.Commands._
 import smtlib.trees.Terms._
+import java.io._
 
 // Example usage of levin. (Actually just quick and dirty testing).
 object Example {
@@ -12,14 +13,16 @@ object Example {
     val parser = new smtlib.parser.Parser(lexer)
 
   var cmd = parser.parseCommand
+  val fw = new FileWriter("test.txt", true) 
   while (cmd != null){
     cmd match {
             case Assert (term) => {
-              println(simplifications.removeExt(term))
+              fw.write(simplifications.removeExt(term).toString)
               }
-            case _ => println("as")
+            case _ => fw.write(cmd.toString)
           }
     cmd = parser.parseCommand
     }
+  fw.close()
   }
 }
