@@ -5,7 +5,7 @@ import smtlib.trees.Commands._
 import smtlib.trees.Terms._
 
 
-package object simplifications {
+package object Simplifications {
     def removeExt (t : Term) : Term = {
         t match {
             case Let (vars, seqVars, ts) => {

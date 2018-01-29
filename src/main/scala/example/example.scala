@@ -17,7 +17,7 @@ object Example {
   while (cmd != null){
     cmd match {
             case Assert (term) => {
-              fw.write(simplifications.removeExt(term).toString)
+              fw.write(Simplifications.removeExt(term).toString)
               }
             case _ => fw.write(cmd.toString)
           }
