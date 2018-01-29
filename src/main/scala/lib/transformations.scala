@@ -45,7 +45,6 @@ package object Transformations {
         case Let (vars, seqVars, x) => (Let (vars, seqVars, _:Term)) compose (createLetFcn(x))
         case _ => identity
       }
-
     }
 
     // Removes the let statements from a term
