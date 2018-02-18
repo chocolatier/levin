@@ -25,12 +25,20 @@ package object Simplifications {
     }
 
     // TODO : Better naming...
+    // TODO : Also reduce width of operators
     def stripExtApplication (t: Term) : Term = { 
         t match {
             // S/ZExt are only applied to a single term
             case FunctionApplication (QualifiedIdentifier(Identifier(SSymbol("zero_extend"),_),_), terms) => terms(0)
             case FunctionApplication (QualifiedIdentifier(Identifier(SSymbol("sign_extend"),_),_), terms) => terms(0)
             case _ => t
+        }
+    }
+
+    def getSSymbol (t : Term) = {
+        t match {
+            case  FunctionApplication (QualifiedIdentifier(Identifier(SSymbol(str),_),_), terms) => str 
+            case _ => "ERROR" //TODO : Replace with proper error message.
         }
     }
 }
