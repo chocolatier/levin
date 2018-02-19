@@ -38,7 +38,47 @@ package object Simplifications {
     def getSSymbol (t : Term) = {
         t match {
             case  FunctionApplication (QualifiedIdentifier(Identifier(SSymbol(str),_),_), terms) => str 
-            case _ => "ERROR" //TODO : Replace with proper error message.
+            case _ => "ERROR" //TODO : Replace with proper exception.
         }
+    }
+
+    // Gets the width of a bitvector
+    // TODO: Implement properly
+    def getbvWidth (t : Term) : Int = {
+        val bvPattern  = "([0-9])".r
+        t match {
+            case FunctionApplication (QualifiedIdentifier (Identifier (SSymbol (bvPattern(p)), _), _), terms) => 8 //terms(0).toInt
+            case _ => -1
+        }
+    }
+
+    // Returns if the operands have the same width, given a sequence of terms
+    def checkbvWidthEqual (ts : Seq[Term]) : Boolean = {
+        val ws = ts.map(getbvWidth)
+        val prev = ws(0)
+        // ws.reduceLeft (==) has type mismatch...
+        for (w <- ws) {
+            if (prev != w){
+                false
+            }
+        }
+
+        true
+    }
+
+    // Replaces bv32 operands with bv8
+    def tobv8 (t : Term) : Term = {
+        println(t)
+        t match {
+            case FunctionApplication (QualifiedIdentifier (Identifier (SSymbol("bvslt"), _),_), _) => println (t)
+            case _ => println ("Error: Not bitvec operation")
+        }
+        t
+    }
+
+    // Giant function to contain all the handcrafted rules
+    def simplify (t : Term) : Term = {
+        
+        t
     }
 }
