@@ -20,7 +20,9 @@ package object Simplifications {
     // TODO: Better naming....
     def handleLetVarBinding (t : VarBinding) : VarBinding = {
         t match {
-            case VarBinding (v, b) => VarBinding (v, stripExtApplication(b))
+            case VarBinding (v, b) => {
+                VarBinding (v, stripExtApplication(b))
+                }
             case _ => t
         }
     }
@@ -30,8 +32,8 @@ package object Simplifications {
     def stripExtApplication (t: Term) : Term = { 
         t match {
             // S/ZExt are only applied to a single term
-            case FunctionApplication (QualifiedIdentifier(Identifier(SSymbol("zero_extend"),_),_), terms) => terms(0)
-            case FunctionApplication (QualifiedIdentifier(Identifier(SSymbol("sign_extend"),_),_), terms) => terms(0)
+            case FunctionApplication (QualifiedIdentifier(Identifier(SSymbol("zero_extend"),_),_), terms) => simplify(terms(0))
+            case FunctionApplication (QualifiedIdentifier(Identifier(SSymbol("sign_extend"),_),_), terms) => simplify(terms(0))
             case _ => t
         }
     }
@@ -69,30 +71,41 @@ package object Simplifications {
 
     //TODO: Replaces bv32 operands with bv8
     def tobv8 (t : Term) : Term = {
-        println(t)
+        // println(t)
         t match {
             case FunctionApplication (QualifiedIdentifier (Identifier (SSymbol("bvslt"), _),_), _) => println (t)
             case _ => println ("Error: Not bitvec operation")
+
         }
         t
     }
 
     // Giant function to contain all the handcrafted rules
+    // XXX: Horrible pattern matches
     def simplify (t : Term) : Term = {
         t match {
             case Let(_,_,_) => handleLet (t)
+            case FunctionApplication (QualifiedIdentifier(Identifier(SSymbol("sign_extend"),_),_), terms) => simplify(terms(0))
             case FunctionApplication (QualifiedIdentifier (Identifier (SSymbol ("="), a), b), List(QualifiedIdentifier(Identifier(SSymbol ("false"), _), _), x)) => {
                 Not (x)
             }
             case FunctionApplication (QualifiedIdentifier (Identifier (SSymbol(x), a),b), terms) => {
+                // println(x)
                 FunctionApplication (QualifiedIdentifier (Identifier (SSymbol (x), a), b), terms.map(simplify))
             }
             case QualifiedIdentifier (Identifier(SSymbol(x), List(SNumeral(y))), p) => {
-                QualifiedIdentifier (Identifier(SSymbol(x), List(SNumeral(8))), p)
+                println(t)
+                println(y)
+                println(y.getClass)
+                println(p)
+                QualifiedIdentifier (Identifier(SSymbol(x), List(SNumeral(math.BigInt(8)))), p)
             }
             case _ => {
+                println("----------------------------------------------------")
                 println(t)
                 println(t.getClass)
+                println("----------------------------------------------------")
+                
                 t
                 }
         }
