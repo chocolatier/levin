@@ -3,6 +3,7 @@ package levin
 import smtlib._
 import smtlib.trees.Commands._
 import smtlib.trees.Terms._
+import theories.Core._
 
 
 package object Simplifications {
@@ -83,9 +84,8 @@ package object Simplifications {
             case FunctionApplication (QualifiedIdentifier (Identifier (SSymbol("and"), a),b), terms) => {
                 FunctionApplication (QualifiedIdentifier (Identifier (SSymbol ("and"), a), b), terms.map(simplify))
             }
-            case FunctionApplication (QualifiedIdentifier (Identifier (SSymbol ("="), a), b), List(QualifiedIdentifier( Identifier(SSymbol ("false"), _), _), _)) => {
-                
-                t
+            case FunctionApplication (QualifiedIdentifier (Identifier (SSymbol ("="), a), b), List(QualifiedIdentifier( Identifier(SSymbol ("false"), _), _), x)) => {
+                Not (x)
             }
             case _ => {
                 println(t)
