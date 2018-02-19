@@ -80,7 +80,12 @@ package object Simplifications {
     def simplify (t : Term) : Term = {
         t match {
             case Let(_,_,_) => handleLet (t)
-            case _ => t
+            case FunctionApplication (QualifiedIdentifier (Identifier (SSymbol("and"), a),b), terms) => {
+                FunctionApplication (QualifiedIdentifier (Identifier (SSymbol ("and"), a), b), terms.map(simplify))
+            }
+            case _ => {
+                println(t)
+                t}
         }
     }
 
