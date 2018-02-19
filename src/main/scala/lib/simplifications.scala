@@ -6,10 +6,10 @@ import smtlib.trees.Terms._
 
 
 package object Simplifications {
-    def removeExt (t : Term) : Term = {
+    def handleLet (t : Term) : Term = {
         t match {
             case Let (vars, seqVars, ts) => {
-                Let (removeExtVarBinding(vars), seqVars.map(removeExtVarBinding), removeExt(ts))
+                Let (handleLetVarBinding(vars), seqVars.map(handleLetVarBinding), simplify (ts))
                 }
             case _ => t
         }
@@ -17,7 +17,7 @@ package object Simplifications {
 
 
     // TODO: Better naming....
-    def removeExtVarBinding (t : VarBinding) : VarBinding = {
+    def handleLetVarBinding (t : VarBinding) : VarBinding = {
         t match {
             case VarBinding (v, b) => VarBinding (v, stripExtApplication(b))
             case _ => t
@@ -66,7 +66,7 @@ package object Simplifications {
         true
     }
 
-    // Replaces bv32 operands with bv8
+    //TODO: Replaces bv32 operands with bv8
     def tobv8 (t : Term) : Term = {
         println(t)
         t match {
@@ -78,7 +78,16 @@ package object Simplifications {
 
     // Giant function to contain all the handcrafted rules
     def simplify (t : Term) : Term = {
-        
+        t match {
+            case Let(_,_,_) => handleLet (t)
+            case _ => t
+        }
+    }
+
+    // Removes declarations like (let ((?B4 ?B2)(?B3 ?B1)) and replaces the respective entries for the aliases
+    def removeAliases(t : Term) : Term = {
         t
     }
+
+    // TODO: Write function to replace entries def substititue 
 }
