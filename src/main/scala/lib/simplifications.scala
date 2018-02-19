@@ -81,14 +81,18 @@ package object Simplifications {
     def simplify (t : Term) : Term = {
         t match {
             case Let(_,_,_) => handleLet (t)
-            case FunctionApplication (QualifiedIdentifier (Identifier (SSymbol("and"), a),b), terms) => {
-                FunctionApplication (QualifiedIdentifier (Identifier (SSymbol ("and"), a), b), terms.map(simplify))
-            }
-            case FunctionApplication (QualifiedIdentifier (Identifier (SSymbol ("="), a), b), List(QualifiedIdentifier( Identifier(SSymbol ("false"), _), _), x)) => {
+            case FunctionApplication (QualifiedIdentifier (Identifier (SSymbol ("="), a), b), List(QualifiedIdentifier(Identifier(SSymbol ("false"), _), _), x)) => {
                 Not (x)
+            }
+            case FunctionApplication (QualifiedIdentifier (Identifier (SSymbol(x), a),b), terms) => {
+                FunctionApplication (QualifiedIdentifier (Identifier (SSymbol (x), a), b), terms.map(simplify))
+            }
+            case QualifiedIdentifier (Identifier(SSymbol(x), List(SNumeral(y))), p) => {
+                QualifiedIdentifier (Identifier(SSymbol(x), List(SNumeral(8))), p)
             }
             case _ => {
                 println(t)
+                println(t.getClass)
                 t
                 }
         }
