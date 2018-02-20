@@ -21,6 +21,8 @@ package object Simplifications {
     def handleLetVarBinding (t : VarBinding) : VarBinding = {
         t match {
             case VarBinding (v, b) => {
+                print("varbinding: ")
+                println(v)
                 VarBinding (v, stripExtApplication(b))
                 }
             case _ => t
@@ -87,7 +89,7 @@ package object Simplifications {
             case Let(_,_,_) => handleLet (t)
             case FunctionApplication (QualifiedIdentifier(Identifier(SSymbol("sign_extend"),_),_), terms) => simplify(terms(0))
             case FunctionApplication (QualifiedIdentifier (Identifier (SSymbol ("="), a), b), List(QualifiedIdentifier(Identifier(SSymbol ("false"), _), _), x)) => {
-                Not (x)
+                Not (simplify(x))
             }
             case FunctionApplication (QualifiedIdentifier (Identifier (SSymbol(x), a),b), terms) => {
                 print ("function application: ")
