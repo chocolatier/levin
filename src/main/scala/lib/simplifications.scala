@@ -12,7 +12,7 @@ package object Simplifications {
             case Let (vars, seqVars, ts) => {
                 Let (handleLetVarBinding(vars), seqVars.map(handleLetVarBinding), simplify (ts))
                 }
-            case _ => t
+            case _ => simplify(t)
         }
     }
 
@@ -34,7 +34,7 @@ package object Simplifications {
             // S/ZExt are only applied to a single term
             case FunctionApplication (QualifiedIdentifier(Identifier(SSymbol("zero_extend"),_),_), terms) => simplify(terms(0))
             case FunctionApplication (QualifiedIdentifier(Identifier(SSymbol("sign_extend"),_),_), terms) => simplify(terms(0))
-            case _ => t
+            case _ => simplify(t)
         }
     }
 
@@ -90,7 +90,9 @@ package object Simplifications {
                 Not (x)
             }
             case FunctionApplication (QualifiedIdentifier (Identifier (SSymbol(x), a),b), terms) => {
-                // println(x)
+                print ("function application: ")
+                println(x)
+                println (terms)
                 FunctionApplication (QualifiedIdentifier (Identifier (SSymbol (x), a), b), terms.map(simplify))
             }
             case QualifiedIdentifier (Identifier(SSymbol(x), List(SNumeral(y))), p) => {
