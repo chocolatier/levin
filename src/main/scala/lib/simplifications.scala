@@ -22,7 +22,6 @@ package object Simplifications {
         t match {
             case VarBinding (v, b) => {
                 print("varbinding: ")
-                println(v)
                 VarBinding (v, stripExtApplication(b))
                 }
             case _ => t
@@ -73,7 +72,6 @@ package object Simplifications {
 
     //TODO: Replaces bv32 operands with bv8
     def tobv8 (t : Term) : Term = {
-        // println(t)
         t match {
             case FunctionApplication (QualifiedIdentifier (Identifier (SSymbol("bvslt"), _),_), _) => println (t)
             case _ => println ("Error: Not bitvec operation")
@@ -92,23 +90,12 @@ package object Simplifications {
                 Not (simplify(x))
             }
             case FunctionApplication (QualifiedIdentifier (Identifier (SSymbol(x), a),b), terms) => {
-                print ("function application: ")
-                println(x)
-                println (terms)
                 FunctionApplication (QualifiedIdentifier (Identifier (SSymbol (x), a), b), terms.map(simplify))
             }
             case QualifiedIdentifier (Identifier(SSymbol(x), List(SNumeral(y))), p) => {
-                println(t)
-                println(y)
-                println(y.getClass)
-                println(p)
                 QualifiedIdentifier (Identifier(SSymbol(x), List(SNumeral(math.BigInt(8)))), p)
             }
             case _ => {
-                println("----------------------------------------------------")
-                println(t)
-                println(t.getClass)
-                println("----------------------------------------------------")
                 
                 t
                 }
