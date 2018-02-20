@@ -20,7 +20,10 @@ package object Simplifications {
     // TODO: Better naming....
     def handleLetVarBinding (t : VarBinding) : VarBinding = {
         t match {
-            case VarBinding (v, b) => {
+            case VarBinding (v, b) =>{
+                val x = stripExtApplication (b)
+                println (x.getClass)
+                println (x)
                 VarBinding (v, stripExtApplication(b))
                 }
             case _ => t
@@ -38,12 +41,41 @@ package object Simplifications {
         }
     }
 
-    def getSSymbol (t : Term) = {
+    // Giant function to contain all the handcrafted rules
+    // XXX: Horrible pattern matches
+    def simplify (t : Term) : Term = {
+        t match {
+            case Let(_,_,_) => handleLet (t)
+            case FunctionApplication (QualifiedIdentifier(Identifier(SSymbol("sign_extend"),_),_), terms) => simplify(terms(0))
+            case FunctionApplication (QualifiedIdentifier (Identifier (SSymbol ("="), a), b), List(QualifiedIdentifier(Identifier(SSymbol ("false"), _), _), x)) => {
+                Not (simplify(x))
+            }
+            case FunctionApplication (QualifiedIdentifier (Identifier (SSymbol(x), a),b), terms) => {
+                FunctionApplication (QualifiedIdentifier (Identifier (SSymbol (x), a), b), terms.map(simplify))
+            }
+            case QualifiedIdentifier (Identifier(SSymbol(x), List(SNumeral(y))), p) => {
+                QualifiedIdentifier (Identifier(SSymbol(x), List(SNumeral(math.BigInt(8)))), p)
+            }
+            case _ => {
+                
+                t
+                }
+        }
+    }
+
+    // Removes declarations like (let ((?B4 ?B2)(?B3 ?B1)) and replaces the respective entries for the aliases
+    def removeAliases(t : Term) : Term = {
+        t
+    }
+
+        def getSSymbol (t : Term) = {
         t match {
             case  FunctionApplication (QualifiedIdentifier(Identifier(SSymbol(str),_),_), terms) => str 
             case _ => "ERROR" //TODO : Replace with proper exception.
         }
     }
+
+    // State 2 simplifications
 
     // Gets the width of a bitvector
     // TODO: Implement properly
@@ -79,32 +111,6 @@ package object Simplifications {
         t
     }
 
-    // Giant function to contain all the handcrafted rules
-    // XXX: Horrible pattern matches
-    def simplify (t : Term) : Term = {
-        t match {
-            case Let(_,_,_) => handleLet (t)
-            case FunctionApplication (QualifiedIdentifier(Identifier(SSymbol("sign_extend"),_),_), terms) => simplify(terms(0))
-            case FunctionApplication (QualifiedIdentifier (Identifier (SSymbol ("="), a), b), List(QualifiedIdentifier(Identifier(SSymbol ("false"), _), _), x)) => {
-                Not (simplify(x))
-            }
-            case FunctionApplication (QualifiedIdentifier (Identifier (SSymbol(x), a),b), terms) => {
-                FunctionApplication (QualifiedIdentifier (Identifier (SSymbol (x), a), b), terms.map(simplify))
-            }
-            case QualifiedIdentifier (Identifier(SSymbol(x), List(SNumeral(y))), p) => {
-                QualifiedIdentifier (Identifier(SSymbol(x), List(SNumeral(math.BigInt(8)))), p)
-            }
-            case _ => {
-                
-                t
-                }
-        }
-    }
-
-    // Removes declarations like (let ((?B4 ?B2)(?B3 ?B1)) and replaces the respective entries for the aliases
-    def removeAliases(t : Term) : Term = {
-        t
-    }
 
     // TODO: Write function to replace entries def substititue 
 }
