@@ -21,7 +21,6 @@ package object Simplifications {
     def handleLetVarBinding (t : VarBinding) : VarBinding = {
         t match {
             case VarBinding (v, b) => {
-                print("varbinding: ")
                 VarBinding (v, stripExtApplication(b))
                 }
             case _ => t
