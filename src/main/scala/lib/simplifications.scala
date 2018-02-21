@@ -50,6 +50,15 @@ package object Simplifications {
             case FunctionApplication (QualifiedIdentifier (Identifier (SSymbol ("="), a), b), List(QualifiedIdentifier(Identifier(SSymbol ("false"), _), _), x)) => {
                 Not (simplify(x))
             }
+            // case FunctionApplication (QualifiedIdentifier (Identifier (SSymbol ("="), a), b), c) => {
+            //     println(t)
+            //     println (c)
+            //     println (c.getClass)
+            //     println(c(0))
+            //     println(c(0).getClass)
+                
+            //     t
+            // }
             case FunctionApplication (QualifiedIdentifier (Identifier (SSymbol(x), a),b), terms) => {
                 FunctionApplication (QualifiedIdentifier (Identifier (SSymbol (x), a), b), terms.map(simplify))
             }
@@ -57,25 +66,26 @@ package object Simplifications {
                 QualifiedIdentifier (Identifier(SSymbol(x), List(SNumeral(math.BigInt(8)))), p)
             }
             case _ => {
-                
+                // println (t)
                 t
                 }
         }
     }
+
+
+    // State 2 simplifications
 
     // Removes declarations like (let ((?B4 ?B2)(?B3 ?B1)) and replaces the respective entries for the aliases
     def removeAliases(t : Term) : Term = {
         t
     }
 
-        def getSSymbol (t : Term) = {
+    def getSSymbol (t : Term) = {
         t match {
             case  FunctionApplication (QualifiedIdentifier(Identifier(SSymbol(str),_),_), terms) => str 
             case _ => "ERROR" //TODO : Replace with proper exception.
         }
     }
-
-    // State 2 simplifications
 
     // Gets the width of a bitvector
     // TODO: Implement properly
