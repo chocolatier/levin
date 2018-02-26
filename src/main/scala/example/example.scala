@@ -18,7 +18,7 @@ object Example {
     cmd match {
             case Assert (term) => {
               // println (Transformations.stripLets(term))
-              println (analysis.unapplyFunction(Transformations.stripLets(term)))
+              println (analysis.generateFcnTree(Transformations.stripLets(term)))
               }
             case _ => fw.write(cmd.toString)
           }
