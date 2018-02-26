@@ -17,7 +17,8 @@ object Example {
   while (cmd != null){
     cmd match {
             case Assert (term) => {
-              fw.write(Assert (Simplifications.simplify(term)).toString)
+              // println (Transformations.stripLets(term))
+              println (analysis.unapplyFunction(Transformations.stripLets(term)))
               }
             case _ => fw.write(cmd.toString)
           }
