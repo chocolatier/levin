@@ -38,6 +38,14 @@ package object Transformations {
       common
     }
 
+  // Returns a sequence of terms when it recieves something joined by ands. Will replace andToVec once its other functionality is split nicely. 
+    def andToVec2 (t : Term) : Seq[Term] = {
+      t match {
+        case FunctionApplication (QualifiedIdentifier(Identifier(SSymbol("and"),_),_), terms) => terms.flatMap(andToVec2)
+        case _ => Seq(t)
+      }
+    }
+
     // Creates an higher order function can be used to 
     // let statements ti a term 
     def createLetFcn (term: Term) : Term => Term = {

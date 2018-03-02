@@ -21,7 +21,7 @@ object Example {
     cmd match {
             case Assert (term) => {
               // println (Transformations.stripLets(term))
-              println (analysis.classify(Seq(stripLets(term))))
+              println (analysis.classify(andToVec2(stripLets(term))))
               }
             case _ => fw.write(cmd.toString)
           }
