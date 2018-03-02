@@ -31,10 +31,12 @@ package object analysis {
     }
 
     def classify (ts : Seq[Term]) = {
-        var m = new scala.collection.mutable.HashMap[fcnTree, Term]
+        var m = new scala.collection.mutable.HashMap[fcnTree, Seq[Term]]
         for (t <- ts) {
             var s = simplify (t)
-            m += (generateFcnTree(s) -> s)
+            var fT = generateFcnTree(s)
+            var olds = m.getOrElse(fT, Seq())
+            m += (fT -> (s+:olds))
         }
 
         m
