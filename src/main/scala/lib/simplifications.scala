@@ -22,8 +22,8 @@ package object Simplifications {
         t match {
             case VarBinding (v, b) =>{
                 val x = stripExtApplication (b)
-                println (x.getClass)
-                println (x)
+                // println (x.getClass)
+                // println (x)
                 VarBinding (v, stripExtApplication(b))
                 }
             case _ => t
@@ -50,12 +50,19 @@ package object Simplifications {
             case FunctionApplication (QualifiedIdentifier (Identifier (SSymbol ("="), a), b), List(QualifiedIdentifier(Identifier(SSymbol ("false"), _), _), x)) => {
                 Not (simplify(x))
             }
-            // case FunctionApplication (QualifiedIdentifier (Identifier (SSymbol ("="), a), b), c) => {
+            // case FunctionApplication (QualifiedIdentifier (Identifier (SSymbol ("="), a), b), QualifiedIdentifier(Identifier(SSymbol("bv0"),_),_)::List(FunctionApplication(QualifiedIdentifier(Identifier(z,_),_),FunctionApplication(u,v)::us))) => {
             //     println(t)
-            //     println (c)
-            //     println (c.getClass)
-            //     println(c(0))
-            //     println(c(0).getClass)
+
+            //     // println (x)
+            //     // println(x.getClass)
+            //     // println(y)
+            //     // println(y.getClass)
+            //     println(z)
+            //     println(z.getClass)
+            //     println(u)
+            //     println(u.getClass)
+            //     println(v)
+            //     println(v.getClass)
                 
             //     t
             // }
@@ -80,12 +87,6 @@ package object Simplifications {
         t
     }
 
-    def getSSymbol (t : Term) = {
-        t match {
-            case  FunctionApplication (QualifiedIdentifier(Identifier(SSymbol(str),_),_), terms) => str 
-            case _ => "ERROR" //TODO : Replace with proper exception.
-        }
-    }
 
     // Gets the width of a bitvector
     // TODO: Implement properly
