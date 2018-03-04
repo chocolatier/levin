@@ -50,5 +50,20 @@ package object analysis {
         classified.reduceRight((a, b) => a.intersect(b))
     }
 
+    def patternFrequency (tss : Seq[Seq[Term]])  = {
+        val classified = tss.map(classify).map(a => a.keySet)
+        
+        var m = new scala.collection.mutable.HashMap[fcnTree, Int]
+
+        for (c <- classified){
+            for (fT <- c){
+                var olds = m.getOrElse(fT, 0)
+                m += (fT -> (olds + 1))
+            }
+        }
+
+        m
+    }
+
     
 }

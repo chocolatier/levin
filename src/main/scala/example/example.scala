@@ -37,7 +37,7 @@ object Example {
         }
 
     }
-    println(analysis.getCommonPatterns(list.toList))
+    println(analysis.patternFrequency(list.toList))
 
   }
 }
