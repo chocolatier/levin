@@ -14,24 +14,24 @@ object Example {
     val lexer = new smtlib.lexer.Lexer(is)
     val parser = new smtlib.parser.Parser(lexer)
 
-  var cmd = parser.parseCommand
-  val fw = new FileWriter("test.txt", true) 
+    var cmd = parser.parseCommand
+    val fw = new FileWriter("test.txt", true) 
 
-  while (cmd != null){
-    cmd match {
-            case Assert (term) => {
-              // println (Transformations.stripLets(term))
-              println (analysis.classify(andToVec2(stripLets(term))))
-              }
-            case _ => fw.write(cmd.toString)
-          }
-    cmd = parser.parseCommand
-    }
-  fw.close()
+    while (cmd != null){
+      cmd match {
+              case Assert (term) => {
+                // println (Transformations.stripLets(term))
+                println (analysis.classify(andToVec2(stripLets(term))))
+                }
+              case _ => fw.write(cmd.toString)
+            }
+      cmd = parser.parseCommand
+      }
+    fw.close()
   }
 
   def testGetCommonPatterns (path : String) = {
     val files  = new File(path).list.filter(_.endsWith(".smt2"))
-    // val f
+    println (files)
   }
 }
