@@ -10,28 +10,34 @@ import levin.Transformations._
 // Example usage of levin. (Actually just quick and dirty testing).
 object Example {
   def main (args: Array[String]): Unit = {
-    val is = new java.io.FileReader("src/main/scala/example/queries/example_query2.smt2")
-    val lexer = new smtlib.lexer.Lexer(is)
-    val parser = new smtlib.parser.Parser(lexer)
-
-    var cmd = parser.parseCommand
-    val fw = new FileWriter("test.txt", true) 
-
-    while (cmd != null){
-      cmd match {
-              case Assert (term) => {
-                // println (Transformations.stripLets(term))
-                println (analysis.classify(andToVec2(stripLets(term))))
-                }
-              case _ => fw.write(cmd.toString)
-            }
-      cmd = parser.parseCommand
-      }
-    fw.close()
+    testGetCommonPatterns("../grammar-learning-dump/outs/no-eval-32-static/size-4")
   }
 
   def testGetCommonPatterns (path : String) = {
-    val files  = new File(path).list.filter(_.endsWith(".smt2"))
-    println (files)
+    val files  = new File(path).listFiles.filter(_.getName.endsWith(".smt2"))
+
+    var list = scala.collection.mutable.ListBuffer.empty[Seq[Term]]
+
+    for (f <- files) {
+      val is = new java.io.FileReader(f)
+      val lexer = new smtlib.lexer.Lexer(is)
+      val parser = new smtlib.parser.Parser(lexer)
+
+      var cmd = parser.parseCommand
+
+      while (cmd != null){
+        cmd match {
+                case Assert (term) => {
+                  val v = andToVec2(stripLets(term))
+                  list += v
+                  }
+                case _ => 
+            }
+        cmd = parser.parseCommand
+        }
+
+    }
+    println(analysis.getCommonPatterns(list.toList))
+
   }
 }
