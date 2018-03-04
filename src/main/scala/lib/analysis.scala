@@ -64,7 +64,24 @@ package object analysis {
 
         m
     }
+
+    def typeSubsetCheck (t : Term) : Seq[String] = {
+        val v = getVar (t) 
+        val ctypeFcns = Seq("isdigit").map(ctypeSMTGen(v, _)).map(Implies(_,t))
+
+        //TODO: Use Z3 Java API to check. 
+        // Something to the effect of 
+        // ctypeFcns.filter(z3.isSatisfiable)
+
+        Seq("digit")
+    }
     
+    //TODO: Implement
+    def getVar (t : Term) = {
+        t
+    }
+
+    //Generates SMT Constraints corresponding to a function in ctype.h 
     def ctypeSMTGen (t : Term, fcn: String) : Term = {
         fcn match {
             case "isdigit" => buildFunctionApplication("and", 
@@ -77,5 +94,6 @@ package object analysis {
     def buildFunctionApplication (fcn : String, ts: Seq[Term]) : Term = {
         FunctionApplication (QualifiedIdentifier (Identifier (SSymbol (fcn), List()), None), ts)
     }
+
 
 }
