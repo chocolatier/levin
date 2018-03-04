@@ -64,6 +64,18 @@ package object analysis {
 
         m
     }
-
     
+    def ctypeSMTGen (t : Term, fcn: String) : Term = {
+        fcn match {
+            case "isdigit" => buildFunctionApplication("and", 
+                Seq(buildFunctionApplication("bvslt", Seq(t,SNumeral(math.BigInt(57)))), 
+                buildFunctionApplication("bvsle", Seq(t, SNumeral(math.BigInt(48))))))
+            case _ => t
+        }
+    }
+
+    def buildFunctionApplication (fcn : String, ts: Seq[Term]) : Term = {
+        FunctionApplication (QualifiedIdentifier (Identifier (SSymbol (fcn), List()), None), ts)
+    }
+
 }
