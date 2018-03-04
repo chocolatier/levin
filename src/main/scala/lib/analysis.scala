@@ -25,11 +25,14 @@ package object analysis {
         }
     }
 
+    // Generates a rose tree that describes shows how the functions in a given term T are composed.
     def generateFcnTree (t : Term) : fcnTree = {
         val tup = unapplyFunction (t)
         fcnTree (tup._1, tup._2.map(generateFcnTree).filter(x => x.node != "NON FUNCTION"))
     }
 
+
+    // Classifies each term in a series of terms according to the function tree. 
     def classify (ts : Seq[Term]) = {
         var m = new scala.collection.mutable.HashMap[fcnTree, Seq[Term]]
         for (t <- ts) {
@@ -42,7 +45,10 @@ package object analysis {
         m
     }
 
+    def getCommonPatterns (tss : Seq[Seq[Term]]) = {
+        val classified = tss.map(classify).map(a => a.keySet)
+        classified.reduceRight((a, b) => a.intersect(b))
+    }
+
     
-
-
 }

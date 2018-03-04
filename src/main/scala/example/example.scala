@@ -29,4 +29,9 @@ object Example {
     }
   fw.close()
   }
+
+  def testGetCommonPatterns (path : String) = {
+    val files  = new File(path).list.filter(_.endsWith(".smt2"))
+    // val f
+  }
 }
