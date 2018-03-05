@@ -19,7 +19,6 @@ package object analysis {
         t match {
             case  FunctionApplication (QualifiedIdentifier(Identifier(SSymbol(str),_),_), terms) => new Tuple2 (str, terms) 
             case _ => {
-                // println (t)
                 new Tuple2 ("NON FUNCTION", Seq())
                 }
         }
@@ -45,11 +44,14 @@ package object analysis {
         m
     }
 
+
+    // Gets patterns common between constraint sets
     def getCommonPatterns (tss : Seq[Seq[Term]]) = {
         val classified = tss.map(classify).map(a => a.keySet)
         classified.reduceRight((a, b) => a.intersect(b))
     }
 
+    // Calculates how frequently a pattern appears 
     def patternFrequency (tss : Seq[Seq[Term]])  = {
         val classified = tss.map(classify).map(a => a.keySet)
         
@@ -65,9 +67,11 @@ package object analysis {
         m
     }
 
+    // TODO : Implememnt
+    // Checks which types are valid
     def typeSubsetCheck (t : Term) : Seq[String] = {
         val v = getVar (t) 
-        val ctypeFcns = Seq("isdigit").map(ctypeSMTGen(v, _)).map(Implies(_,t))
+        val ctypeFcns = Seq("isdigit", "isxdigit").map(ctypeSMTGen(v, _)).map(Implies(_,t))
 
         //TODO: Use an SMT Solver to check. 
         // Something to the effect of 
@@ -96,6 +100,7 @@ package object analysis {
         }
     }
 
+    // Returns l <= t <= u
     def rangeCheck (l : BigInt, u : BigInt, t : Term) = {
         buildFunctionApplication("and", 
                 Seq(buildFunctionApplication("bvsle", Seq(t,SNumeral(u))), 
@@ -105,6 +110,4 @@ package object analysis {
     def buildFunctionApplication (fcn : String, ts: Seq[Term]) : Term = {
         FunctionApplication (QualifiedIdentifier (Identifier (SSymbol (fcn), List()), None), ts)
     }
-
-
 }
