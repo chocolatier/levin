@@ -84,22 +84,22 @@ package object analysis {
     //Generates SMT Constraints corresponding to a function in ctype.h 
     def ctypeSMTGen (t : Term, fcn: String) : Term = {
         fcn match {
-            case "isdigit" => buildFunctionApplication("and", 
-                Seq(buildFunctionApplication("bvsle", Seq(t,SNumeral(math.BigInt(57)))), 
-                buildFunctionApplication("bvsle", Seq(t, SNumeral(math.BigInt(48))))))
+            case "isdigit" => rangeCheck(48,57,t)
             case "isspace" => buildFunctionApplication("=", Seq(t, SNumeral(math.BigInt(20))))
             case "isxdigit" => buildFunctionApplication ("or", Seq(ctypeSMTGen(t, "isdigit"),
                 ctypeSMTGen(t, "isxletter")))
             case "isxletter" => buildFunctionApplication("or", Seq(ctypeSMTGen(t,"isxletterL"),
                                 ctypeSMTGen(t, "isxletterU"))) 
-            case "isxletterU" => buildFunctionApplication("and", 
-                Seq(buildFunctionApplication("bvsle", Seq(t,SNumeral(math.BigInt(70)))), 
-                buildFunctionApplication("bvsle", Seq(t, SNumeral(math.BigInt(65))))))
-            case "isxletterL" => buildFunctionApplication("and", 
-                Seq(buildFunctionApplication("bvsle", Seq(t,SNumeral(math.BigInt(97)))), 
-                buildFunctionApplication("bvsle", Seq(t, SNumeral(math.BigInt(102))))))
+            case "isxletterU" => rangeCheck(65,70, t)
+            case "isxletterL" => rangeCheck(97,102, t)
             case _ => t
         }
+    }
+
+    def rangeCheck (l : BigInt, u : BigInt, t : Term) = {
+        buildFunctionApplication("and", 
+                Seq(buildFunctionApplication("bvsle", Seq(t,SNumeral(u))), 
+                buildFunctionApplication("bvsle", Seq(SNumeral(l), t))))
     }
 
     def buildFunctionApplication (fcn : String, ts: Seq[Term]) : Term = {
