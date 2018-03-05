@@ -50,22 +50,6 @@ package object Simplifications {
             case FunctionApplication (QualifiedIdentifier (Identifier (SSymbol ("="), a), b), List(QualifiedIdentifier(Identifier(SSymbol ("false"), _), _), x)) => {
                 Not (simplify(x))
             }
-            // case FunctionApplication (QualifiedIdentifier (Identifier (SSymbol ("="), a), b), QualifiedIdentifier(Identifier(SSymbol("bv0"),_),_)::List(FunctionApplication(QualifiedIdentifier(Identifier(z,_),_),FunctionApplication(u,v)::us))) => {
-            //     println(t)
-
-            //     // println (x)
-            //     // println(x.getClass)
-            //     // println(y)
-            //     // println(y.getClass)
-            //     println(z)
-            //     println(z.getClass)
-            //     println(u)
-            //     println(u.getClass)
-            //     println(v)
-            //     println(v.getClass)
-                
-            //     t
-            // }
             case FunctionApplication (QualifiedIdentifier (Identifier (SSymbol(x), a),b), terms) => {
                 FunctionApplication (QualifiedIdentifier (Identifier (SSymbol (x), a), b), terms.map(simplify))
             }

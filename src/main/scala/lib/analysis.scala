@@ -69,7 +69,7 @@ package object analysis {
         val v = getVar (t) 
         val ctypeFcns = Seq("isdigit").map(ctypeSMTGen(v, _)).map(Implies(_,t))
 
-        //TODO: Use Z3 Java API to check. 
+        //TODO: Use an SMT Solver to check. 
         // Something to the effect of 
         // ctypeFcns.filter(z3.isSatisfiable)
 
@@ -85,8 +85,19 @@ package object analysis {
     def ctypeSMTGen (t : Term, fcn: String) : Term = {
         fcn match {
             case "isdigit" => buildFunctionApplication("and", 
-                Seq(buildFunctionApplication("bvslt", Seq(t,SNumeral(math.BigInt(57)))), 
+                Seq(buildFunctionApplication("bvsle", Seq(t,SNumeral(math.BigInt(57)))), 
                 buildFunctionApplication("bvsle", Seq(t, SNumeral(math.BigInt(48))))))
+            case "isspace" => buildFunctionApplication("=", Seq(t, SNumeral(math.BigInt(20))))
+            case "isxdigit" => buildFunctionApplication ("or", Seq(ctypeSMTGen(t, "isdigit"),
+                ctypeSMTGen(t, "isxletter")))
+            case "isxletter" => buildFunctionApplication("or", Seq(ctypeSMTGen(t,"isxletterL"),
+                                ctypeSMTGen(t, "isxletterU"))) 
+            case "isxletterU" => buildFunctionApplication("and", 
+                Seq(buildFunctionApplication("bvsle", Seq(t,SNumeral(math.BigInt(70)))), 
+                buildFunctionApplication("bvsle", Seq(t, SNumeral(math.BigInt(65))))))
+            case "isxletterL" => buildFunctionApplication("and", 
+                Seq(buildFunctionApplication("bvsle", Seq(t,SNumeral(math.BigInt(97)))), 
+                buildFunctionApplication("bvsle", Seq(t, SNumeral(math.BigInt(102))))))
             case _ => t
         }
     }
