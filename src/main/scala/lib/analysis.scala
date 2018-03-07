@@ -96,6 +96,10 @@ package object analysis {
                                 ctypeSMTGen(t, "isxletterU"))) 
             case "isxletterU" => rangeCheck(65,70, t)
             case "isxletterL" => rangeCheck(97,102, t)
+            case "isalph" => buildFunctionApplication ("or", Seq (rangeCheck(65,90,t), 
+                                rangeCheck(97, 122, t)))
+            case "isalphnum" => buildFunctionApplication("or", Seq (ctypeSMTGen(t, "isalph"), 
+                                ctypeSMTGen(t, "isdigit")))
             case _ => t
         }
     }
