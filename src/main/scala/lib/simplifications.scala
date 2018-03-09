@@ -101,7 +101,7 @@ package object Simplifications {
         t match {
             case FunctionApplication (QualifiedIdentifier (Identifier (SSymbol("bvslt"), _),_), _) => println (t)
             case _ => println ("Error: Not bitvec operation")
-
+            
         }
         t
     }

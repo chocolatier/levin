@@ -114,4 +114,5 @@ package object analysis {
     def buildFunctionApplication (fcn : String, ts: Seq[Term]) : Term = {
         FunctionApplication (QualifiedIdentifier (Identifier (SSymbol (fcn), List()), None), ts)
     }
+    
 }
