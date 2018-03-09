@@ -105,10 +105,16 @@ package object analysis {
     }
 
     // Returns l <= t <= u
+    // TODO: Unhardcode width
     def rangeCheck (l : BigInt, u : BigInt, t : Term) = {
         buildFunctionApplication("and", 
-                Seq(buildFunctionApplication("bvsle", Seq(t,SNumeral(u))), 
-                buildFunctionApplication("bvsle", Seq(SNumeral(l), t))))
+                Seq(buildFunctionApplication("bvsle", Seq(t,constBitVec(u,8))), 
+                buildFunctionApplication("bvsle", Seq(constBitVec(l,8), t))))
+    }
+
+    def constBitVec (n : BigInt, w: Int)  = {
+        QualifiedIdentifier (Identifier (SSymbol ("bv" + n.toString), List(SNumeral(w))), None)
+        
     }
 
     def buildFunctionApplication (fcn : String, ts: Seq[Term]) : Term = {
