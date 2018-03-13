@@ -71,7 +71,7 @@ package object analysis {
     // Checks which types are valid
     def typeSubsetCheck (t : Term) : Seq[String] = {
         val v = getVar (t) 
-        val ctypeFcns = Seq("isdigit", "isxdigit").map(ctypeSMTGen(v, _)).map(Implies(_,t))
+        val ctypeFcns = Seq("isdigit", "isxdigit", "isalph", "isalphnum").map(ctypeSMTGen(v, _)).map(Implies(_,t))
 
         //TODO: Use an SMT Solver to check. 
         // Something to the effect of 
@@ -100,6 +100,7 @@ package object analysis {
                                 rangeCheck(97, 122, t)))
             case "isalphnum" => buildFunctionApplication("or", Seq (ctypeSMTGen(t, "isalph"), 
                                 ctypeSMTGen(t, "isdigit")))
+            case "garbage" => rangeCheck(12,11,t)
             case _ => t
         }
     }
@@ -109,7 +110,7 @@ package object analysis {
     def rangeCheck (l : BigInt, u : BigInt, t : Term) = {
         buildFunctionApplication("and", 
                 Seq(buildFunctionApplication("bvsle", Seq(t,constBitVec(u,8))), 
-                buildFunctionApplication("bvsle", Seq(constBitVec(l,8), t))))
+                buildFunctionApplication("bvsge", Seq(t,constBitVec(l,8)))))
     }
 
     def constBitVec (n : BigInt, w: Int)  = {
@@ -121,4 +122,42 @@ package object analysis {
         FunctionApplication (QualifiedIdentifier (Identifier (SSymbol (fcn), List()), None), ts)
     }
     
+
+    // Type inference 
+    // TODO: Replace ifs with global structure check
+    def inferType (target : Term, constraints: Term) = {
+        val alphnum_check = buildFunctionApplication("and", Seq(ctypeSMTGen(target, "isalphanum"), constraints))
+        // val is_alphanum = z3.check_sat (is_alphanum) //TODO: Integrate z3
+        val is_alphanum = true 
+
+        if (is_alphanum) {
+            val not_xdigit_check = Not (buildFunctionApplication("and",  Seq(ctypeSMTGen(target, "isxdigit"), constraints)))
+            val digit_check = buildFunctionApplication("and", Seq(ctypeSMTGen(target, "isdigit"), constraints))
+            val aplha_check = buildFunctionApplication("and", Seq(ctypeSMTGen(target, "isalph"), constraints))
+
+            // val is_digit = z3.check(digit_check)
+            // val is_alpha = z3.check(alpha_check)
+            // val is_notxdigit = z3.check(xdigit_check)
+
+            val is_digit = true
+            val is_alpha = true
+            val is_notxdigit = true
+
+            if (is_digit && is_alpha){
+                if (is_notxdigit){
+                    "alphanum"
+                } else {
+                    "xdigit"
+                }
+            }
+
+            if (is_digit) {
+                "digit"
+            } else {
+                "alpha"
+            }            
+        }
+
+        "symbol"
+    }
 }
