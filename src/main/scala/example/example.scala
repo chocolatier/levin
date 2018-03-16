@@ -6,6 +6,9 @@ import smtlib._
 import smtlib.trees.Commands._
 import smtlib.trees.Terms._
 import theories.Core._
+import trees.Terms._
+import theories.ArraysEx._
+import theories.Ints.{IntSort, NumeralLit}
 
 import levin.Transformations._
 import levin.analysis._
@@ -16,7 +19,39 @@ import levin.analysis._
 object Example {
   def main (args: Array[String]): Unit = {
     // testGetCommonPatterns("../grammar-learning-dump/outs/no-eval-32-static/size-4")
-    testImplications
+    // testImplications
+    iterateOverBitvec("../grammar-learning-dump/outs/no-eval-32-static/size-4")
+  }
+
+  def iterateOverBitvec (path : String) = {
+    val files  = new File(path).listFiles.filter(_.getName.endsWith(".smt2"))
+
+    var list = scala.collection.mutable.ListBuffer.empty[Seq[Term]]
+
+    for (f <- files) {
+      val is = new java.io.FileReader(f)
+      val lexer = new smtlib.lexer.Lexer(is)
+      val parser = new smtlib.parser.Parser(lexer)
+
+      var cmd = parser.parseCommand
+      while (cmd != null) {
+        println (cmd.getClass)
+        cmd match {
+          case DeclareFun (f, g, h) => {
+            cmd = parser.parseCommand
+            cmd match {
+              case Assert (x) => {
+                println(inferType(Select(f, NumeralLit(0)), x))
+                }
+              case _ => println(cmd)
+            }
+          }
+          case Assert (x) => println("asdf")
+          case _ => println(cmd)
+        }
+        cmd = parser.parseCommand
+      }
+    }
   }
 
   def testGetCommonPatterns (path : String) = {
@@ -73,11 +108,19 @@ object Example {
     fw.close    
   }
 
+  def buildAnd (t: Term) = {
+    val letFcn = createLetFcn (t)
+    val woLets = stripLets (t) 
+    val app = grabFirstLet (t)
+    letFcn (buildFunctionApplication("and", Seq(ctypeSMTGen(app, "garbage"), woLets)))
+  }
+
   def buildImplication (t : Term) = {
     val letFcn = createLetFcn (t)
     val woLets = stripLets (t) 
     val app = grabFirstLet (t)
-    letFcn (Implies (ctypeSMTGen(app, "isdigit"), woLets))
+    letFcn (Implies (ctypeSMTGen(app, "garbage"), woLets))
+
   }
 
   def grabFirstLet (t : Term) = {
