@@ -41,7 +41,7 @@ object Example {
             cmd = parser.parseCommand
             cmd match {
               case Assert (x) => {
-                println(inferType(Select(f, NumeralLit(0)), x))
+                println(inferType(Select(QualifiedIdentifier(SimpleIdentifier(f)), NumeralLit(0)), x))
                 }
               case _ => println(cmd)
             }
