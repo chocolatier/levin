@@ -3,3 +3,4 @@ target
 *.log
 .vscode/launch.json
 lib/com.microsoft.z3.jar
+lib/*
