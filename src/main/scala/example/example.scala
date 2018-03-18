@@ -20,13 +20,14 @@ object Example {
   def main (args: Array[String]): Unit = {
     // testGetCommonPatterns("../grammar-learning-dump/outs/no-eval-32-static/size-4")
     // testImplications
-    iterateOverBitvec("../grammar-learning-dump/outs/no-eval-32-static/size-4")
+    iterateOverBitvec("../grammar-learning-dump/outs/no-eval-32-static/size-4", 4)
   }
 
-  def iterateOverBitvec (path : String) = {
+  def iterateOverBitvec (path : String, length : Int) = {
     val files  = new File(path).listFiles.filter(_.getName.endsWith(".smt2"))
 
     var list = scala.collection.mutable.ListBuffer.empty[Seq[Term]]
+    var ctx = scala.collection.mutable.ListBuffer.empty[Command]
 
     for (f <- files) {
       val is = new java.io.FileReader(f)
@@ -35,19 +36,20 @@ object Example {
 
       var cmd = parser.parseCommand
       while (cmd != null) {
-        println (cmd.getClass)
         cmd match {
           case DeclareFun (f, g, h) => {
+            ctx += cmd
             cmd = parser.parseCommand
             cmd match {
               case Assert (x) => {
-                println(inferType(Select(QualifiedIdentifier(SimpleIdentifier(f)), NumeralLit(0)), x))
+                for (i <- 0 to (length - 1))
+                println(inferType(Select(QualifiedIdentifier(SimpleIdentifier(f)), NumeralLit(i)), x, ctx))
                 }
-              case _ => println(cmd)
+              case _ => //println(cmd)
             }
           }
-          case Assert (x) => println("asdf")
-          case _ => println(cmd)
+          case Assert (x) => // println("asdf")
+          case _ => ctx += cmd
         }
         cmd = parser.parseCommand
       }

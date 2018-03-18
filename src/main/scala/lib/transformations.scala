@@ -55,6 +55,13 @@ package object Transformations {
       }
     }
 
+   def listLets (term : Term) : List[VarBinding] = {
+     term match {
+       case Let (vars, seqVars, x) => (vars::seqVars.toList):::listLets(x)
+       case _ => List() 
+     }
+   }
+
     // Removes the let statements from a term
     def stripLets (expr : Term) : Term = {
       expr match {

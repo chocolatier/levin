@@ -7,6 +7,8 @@ import theories.Core._
 
 import levin.Simplifications._
 
+import com.microsoft.z3._
+
 package object analysis {
 
     // A rose tree to store the applied functions. 
@@ -69,6 +71,7 @@ package object analysis {
 
     // TODO : Implememnt
     // Checks which types are valid
+    // TODO: Figure out why $a \implies b$ for disjoint $a, b$ still gives me sat. 
     def typeSubsetCheck (t : Term) : Seq[String] = {
         val v = getVar (t) 
         val ctypeFcns = Seq("isdigit", "isxdigit", "isalph", "isalphnum").map(ctypeSMTGen(v, _)).map(Implies(_,t))
@@ -100,7 +103,6 @@ package object analysis {
                                 rangeCheck(97, 122, t)))
             case "isalphnum" => buildFunctionApplication("or", Seq (ctypeSMTGen(t, "isalph"), 
                                 ctypeSMTGen(t, "isdigit")))
-            case "garbage" => rangeCheck(12,11,t)
             case _ => t
         }
     }
@@ -121,27 +123,60 @@ package object analysis {
     def buildFunctionApplication (fcn : String, ts: Seq[Term]) : Term = {
         FunctionApplication (QualifiedIdentifier (Identifier (SSymbol (fcn), List()), None), ts)
     }
-    
+     
 
     // Type inference 
     // TODO: Replace ifs with global structure check
-    def inferType (target : Term, constraints: Term) = {
-        val alphnum_check = buildFunctionApplication("and", Seq(ctypeSMTGen(target, "isalphanum"), constraints))
-        // val is_alphanum = z3.check_sat (is_alphanum) //TODO: Integrate z3
-        val is_alphanum = true 
+    // TODO: Replace calculus of intersections with proper subset checks. 
+    def inferType (target : Term, constraints: Term, ctx: Seq[Command]) = {
+        val alphanum_check = buildFunctionApplication("and", Seq(ctypeSMTGen(target, "isalphanum"), constraints))
+        // println(alphanum_check)
+        var context = new Context();
+
+        for (c <- ctx){
+            //get-value creates a parser error...
+            if (!(c.toString contains "get-value")){
+                val t = context.parseSMTLIB2String(c.toString, null, null, null, null)
+                }
+        }
+
+        println ("ctx: " + context)
+
+        val bExpr = context.parseSMTLIB2String(alphanum_check.toString, null, null, null, null)
+        val solver = context.mkSolver
+        val sat = Status.SATISFIABLE
+        solver.add(bExpr)
+        println("bExpr: " + bExpr.toString)
+        println(solver)
+        val is_alphanum = solver.check() == sat
+        println ("alphanum: " + is_alphanum)
 
         if (is_alphanum) {
             val not_xdigit_check = Not (buildFunctionApplication("and",  Seq(ctypeSMTGen(target, "isxdigit"), constraints)))
             val digit_check = buildFunctionApplication("and", Seq(ctypeSMTGen(target, "isdigit"), constraints))
-            val aplha_check = buildFunctionApplication("and", Seq(ctypeSMTGen(target, "isalph"), constraints))
+            val alpha_check = buildFunctionApplication("and", Seq(ctypeSMTGen(target, "isalph"), constraints))
 
             // val is_digit = z3.check(digit_check)
-            // val is_alpha = z3.check(alpha_check)
+            // val is_alpha = z3.check(alpha_check) 
             // val is_notxdigit = z3.check(xdigit_check)
 
-            val is_digit = true
-            val is_alpha = true
-            val is_notxdigit = true
+            val xdigitExpr = context.parseSMTLIB2String(not_xdigit_check.toString, null, null, null, null)
+            solver.add(xdigitExpr)
+            val is_notxdigit = solver.check() == sat 
+
+            println("is_notxdigit: " + is_notxdigit)
+
+            val alphaExpr = context.parseSMTLIB2String(alpha_check.toString, null, null, null, null)
+            solver.add(alphaExpr)
+            val is_alpha = solver.check() == sat 
+
+            println("is_alpha: " + is_alpha)
+
+            val digitExpr = context.parseSMTLIB2String(not_xdigit_check.toString, null, null, null, null)
+            solver.add(digitExpr)
+            val is_digit = solver.check() == sat 
+
+            println("is_digit: " + is_digit)
 
             if (is_digit && is_alpha){
                 if (is_notxdigit){
@@ -156,8 +191,35 @@ package object analysis {
             } else {
                 "alpha"
             }            
+        } else {
+            "symbol"
         }
+    }   
 
-        "symbol"
-    }
+    // def unapplySelect (t : Term) = {
+    //     t match {
+    //         Select(m, NumeralLit(x)) => x 
+    //         _ => -1
+    //     }
+    // }
+
+    // def identifyByte (constraints : Term , context : Term) = {
+    //     varAliases = listLets (context)
+
+    // }
+
+    // def splitByByte (constraints : Seq[Term]) = {
+    //     var m  = new scala.collection.map.mutable.HashMap[Int, Seq[Term]]
+    //     constraints.foldl (0) { (m, t) => 
+    //         val b = identifyByte(t, t)
+    //         olds = m.getOrElse(b, Seq())
+    //         m += (b, olds::t)
+
+    //     }
+    // }
+
+    // def buildConstraintGraph( constraints : Seq[Term]) = {
+        
+
+    // }
 }
