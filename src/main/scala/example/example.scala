@@ -20,7 +20,7 @@ object Example {
   def main (args: Array[String]): Unit = {
     // testGetCommonPatterns("../grammar-learning-dump/outs/no-eval-32-static/size-4")
     // testImplications
-    iterateOverBitvec("../grammar-learning-dump/outs/no-eval-32-static/size-4", 4)
+    iterateOverBitvec("../grammar-learning-dump/outs/no-eval-32-static/size-4", 1)
   }
 
   def iterateOverBitvec (path : String, length : Int) = {
@@ -29,7 +29,9 @@ object Example {
     var list = scala.collection.mutable.ListBuffer.empty[Seq[Term]]
     var ctx = scala.collection.mutable.ListBuffer.empty[Command]
 
-    for (f <- files) {
+    // for (f <- files) {
+      val f = files(7)
+      println(f)
       val is = new java.io.FileReader(f)
       val lexer = new smtlib.lexer.Lexer(is)
       val parser = new smtlib.parser.Parser(lexer)
@@ -43,7 +45,7 @@ object Example {
             cmd match {
               case Assert (x) => {
                 for (i <- 0 to (length - 1))
-                println(inferType(Select(QualifiedIdentifier(SimpleIdentifier(f)), NumeralLit(i)), x, ctx))
+                println(inferType(buildbvSelect(f,i), x, ctx))
                 }
               case _ => //println(cmd)
             }
@@ -52,7 +54,7 @@ object Example {
           case _ => ctx += cmd
         }
         cmd = parser.parseCommand
-      }
+      // }
     }
   }
 
@@ -108,6 +110,11 @@ object Example {
     }
 
     fw.close    
+  }
+
+  def buildbvSelect (identifier : SSymbol , position: Int) = {
+    Select(QualifiedIdentifier(SimpleIdentifier(identifier)), QualifiedIdentifier(Identifier(SSymbol("bv" + position.toString),List(SNumeral(32))), None)) 
+  
   }
 
   def buildAnd (t: Term) = {

@@ -128,9 +128,10 @@ package object analysis {
     // Type inference 
     // TODO: Replace ifs with global structure check
     // TODO: Replace calculus of intersections with proper subset checks. 
+    // TODO: Figure out a way to not have everything to parse to (assert true)
     def inferType (target : Term, constraints: Term, ctx: Seq[Command]) = {
-        val alphanum_check = buildFunctionApplication("and", Seq(ctypeSMTGen(target, "isalphanum"), constraints))
-        // println(alphanum_check)
+        val alphanum_check = buildFunctionApplication("and", Seq(ctypeSMTGen(target, "isalphnum"), constraints))
+        println(alphanum_check)
         var context = new Context();
 
         for (c <- ctx){
@@ -140,14 +141,11 @@ package object analysis {
                 }
         }
 
-        println ("ctx: " + context)
-
         val bExpr = context.parseSMTLIB2String(alphanum_check.toString, null, null, null, null)
         val solver = context.mkSolver
         val sat = Status.SATISFIABLE
         solver.add(bExpr)
         println("bExpr: " + bExpr.toString)
-        println(solver)
         val is_alphanum = solver.check() == sat
         println ("alphanum: " + is_alphanum)
 
@@ -167,6 +165,7 @@ package object analysis {
             println("is_notxdigit: " + is_notxdigit)
 
             val alphaExpr = context.parseSMTLIB2String(alpha_check.toString, null, null, null, null)
+            println("alphaExpr:" + alphaExpr)
             solver.add(alphaExpr)
             val is_alpha = solver.check() == sat 
 
