@@ -139,39 +139,27 @@ package object analysis {
         val solver = context.mkSolver
         val sat = Status.SATISFIABLE
         solver.add(bExpr)
-        // println("bExpr: " + bExpr.toString)
         val is_alphanum = solver.check() == sat
-        // println ("alphanum: " + is_alphanum)
 
         if (is_alphanum) {
             val not_xdigit_check = Assert (Not (buildFunctionApplication("and",  Seq(ctypeSMTGen(target, "isxdigit"), constraints))))
             val digit_check = Assert (buildFunctionApplication("and", Seq(ctypeSMTGen(target, "isdigit"), constraints)))
             val alpha_check = Assert (buildFunctionApplication("and", Seq(ctypeSMTGen(target, "isalph"), constraints)))
 
-            // val is_digit = z3.check(digit_check)
-            // val is_alpha = z3.check(alpha_check) 
-            // val is_notxdigit = z3.check(xdigit_check)
-
             val xdigitExpr = context.parseSMTLIB2String(catctx + not_xdigit_check.toString, null, null, null, null)
-            solver.add(xdigitExpr)
-            val is_notxdigit = solver.check() == sat 
-
-            // println("is_notxdigit: " + is_notxdigit)
+            val xdsolver = context.mkSolver
+            xdsolver.add(xdigitExpr)
+            val is_notxdigit = xdsolver.check() == sat 
 
             val alphaExpr = context.parseSMTLIB2String(catctx + alpha_check.toString, null, null, null, null)
-            // println("alphaExpr:" + alphaExpr)
             solver.add(alphaExpr)
             val is_alpha = solver.check() == sat 
-
-            // println("is_alpha: " + is_alpha)
 
             val dsolver = context.mkSolver
 
             val digitExpr = context.parseSMTLIB2String(catctx + not_xdigit_check.toString, null, null, null, null)
             dsolver.add(digitExpr)
             val is_digit = dsolver.check() == sat 
-
-            // println("is_digit: " + is_digit)
 
             if (is_digit && is_alpha){
                 if (is_notxdigit){
