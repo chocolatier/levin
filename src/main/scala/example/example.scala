@@ -27,11 +27,10 @@ object Example {
     val files  = new File(path).listFiles.filter(_.getName.endsWith(".smt2"))
 
     var list = scala.collection.mutable.ListBuffer.empty[Seq[Term]]
-    var ctx = scala.collection.mutable.ListBuffer.empty[Command]
 
-    // for (f <- files) {
-      val f = files(8)
-      // println(f)
+    for (f <- files) {
+      var ctx = scala.collection.mutable.ListBuffer.empty[Command]
+      println(f)
       val is = new java.io.FileReader(f)
       val lexer = new smtlib.lexer.Lexer(is)
       val parser = new smtlib.parser.Parser(lexer)
@@ -54,7 +53,7 @@ object Example {
           case _ => ctx += cmd
         }
         cmd = parser.parseCommand
-      // }
+      }
     }
   }
 
