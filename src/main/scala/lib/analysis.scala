@@ -130,52 +130,48 @@ package object analysis {
     // TODO: Replace calculus of intersections with proper subset checks. 
     // TODO: Figure out a way to not have everything to parse to (assert true)
     def inferType (target : Term, constraints: Term, ctx: Seq[Command]) = {
-        val alphanum_check = buildFunctionApplication("and", Seq(ctypeSMTGen(target, "isalphnum"), constraints))
-        println(alphanum_check)
+        val alphanum_check = Assert (buildFunctionApplication("and", Seq(ctypeSMTGen(target, "isalphnum"), constraints)))
         var context = new Context();
 
-        for (c <- ctx){
-            //get-value creates a parser error...
-            if (!(c.toString contains "get-value")){
-                val t = context.parseSMTLIB2String(c.toString, null, null, null, null)
-                }
-        }
+        val catctx = ctx.filter(c => !(c.toString contains "get-value")).mkString("")
 
-        val bExpr = context.parseSMTLIB2String(alphanum_check.toString, null, null, null, null)
+        val bExpr = context.parseSMTLIB2String(catctx + alphanum_check.toString, null, null, null, null)
         val solver = context.mkSolver
         val sat = Status.SATISFIABLE
         solver.add(bExpr)
-        println("bExpr: " + bExpr.toString)
+        // println("bExpr: " + bExpr.toString)
         val is_alphanum = solver.check() == sat
-        println ("alphanum: " + is_alphanum)
+        // println ("alphanum: " + is_alphanum)
 
         if (is_alphanum) {
-            val not_xdigit_check = Not (buildFunctionApplication("and",  Seq(ctypeSMTGen(target, "isxdigit"), constraints)))
-            val digit_check = buildFunctionApplication("and", Seq(ctypeSMTGen(target, "isdigit"), constraints))
-            val alpha_check = buildFunctionApplication("and", Seq(ctypeSMTGen(target, "isalph"), constraints))
+            val not_xdigit_check = Assert (Not (buildFunctionApplication("and",  Seq(ctypeSMTGen(target, "isxdigit"), constraints))))
+            val digit_check = Assert (buildFunctionApplication("and", Seq(ctypeSMTGen(target, "isdigit"), constraints)))
+            val alpha_check = Assert (buildFunctionApplication("and", Seq(ctypeSMTGen(target, "isalph"), constraints)))
 
             // val is_digit = z3.check(digit_check)
             // val is_alpha = z3.check(alpha_check) 
             // val is_notxdigit = z3.check(xdigit_check)
 
-            val xdigitExpr = context.parseSMTLIB2String(not_xdigit_check.toString, null, null, null, null)
+            val xdigitExpr = context.parseSMTLIB2String(catctx + not_xdigit_check.toString, null, null, null, null)
             solver.add(xdigitExpr)
             val is_notxdigit = solver.check() == sat 
 
-            println("is_notxdigit: " + is_notxdigit)
+            // println("is_notxdigit: " + is_notxdigit)
 
-            val alphaExpr = context.parseSMTLIB2String(alpha_check.toString, null, null, null, null)
-            println("alphaExpr:" + alphaExpr)
+            val alphaExpr = context.parseSMTLIB2String(catctx + alpha_check.toString, null, null, null, null)
+            // println("alphaExpr:" + alphaExpr)
             solver.add(alphaExpr)
             val is_alpha = solver.check() == sat 
 
-            println("is_alpha: " + is_alpha)
+            // println("is_alpha: " + is_alpha)
 
-            val digitExpr = context.parseSMTLIB2String(not_xdigit_check.toString, null, null, null, null)
-            solver.add(digitExpr)
-            val is_digit = solver.check() == sat 
+            val dsolver = context.mkSolver
 
-            println("is_digit: " + is_digit)
+            val digitExpr = context.parseSMTLIB2String(catctx + not_xdigit_check.toString, null, null, null, null)
+            dsolver.add(digitExpr)
+            val is_digit = dsolver.check() == sat 
+
+            // println("is_digit: " + is_digit)
 
             if (is_digit && is_alpha){
                 if (is_notxdigit){

@@ -20,7 +20,7 @@ object Example {
   def main (args: Array[String]): Unit = {
     // testGetCommonPatterns("../grammar-learning-dump/outs/no-eval-32-static/size-4")
     // testImplications
-    iterateOverBitvec("../grammar-learning-dump/outs/no-eval-32-static/size-4", 1)
+    iterateOverBitvec("../grammar-learning-dump/outs/no-eval-32-static/size-4", 4)
   }
 
   def iterateOverBitvec (path : String, length : Int) = {
@@ -30,8 +30,8 @@ object Example {
     var ctx = scala.collection.mutable.ListBuffer.empty[Command]
 
     // for (f <- files) {
-      val f = files(7)
-      println(f)
+      val f = files(8)
+      // println(f)
       val is = new java.io.FileReader(f)
       val lexer = new smtlib.lexer.Lexer(is)
       val parser = new smtlib.parser.Parser(lexer)
