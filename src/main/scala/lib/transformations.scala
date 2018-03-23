@@ -3,8 +3,10 @@ package levin
 import smtlib._
 import smtlib.trees.Commands._
 import smtlib.trees.Terms._
+import theories.ArraysEx._
 
 import scala.collection.mutable.ListBuffer
+
 
 package object Transformations {
 
@@ -54,6 +56,11 @@ package object Transformations {
         case _ => identity
       }
     }
+
+  def buildbvSelect (identifier : SSymbol , position: Int) = {
+    Select(QualifiedIdentifier(SimpleIdentifier(identifier)), QualifiedIdentifier(Identifier(SSymbol("bv" + position.toString),List(SNumeral(32))), None)) 
+  }
+
 
    def listLets (term : Term) : List[VarBinding] = {
      term match {
