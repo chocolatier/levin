@@ -13,25 +13,34 @@ import theories.Ints.{IntSort, NumeralLit}
 import levin.Transformations._
 import levin.analysis._
 
-
+import play.api.libs.json._
 
 // Example usage of levin. (Actually just quick and dirty testing).
 object Example {
   def main (args: Array[String]): Unit = {
     // testGetCommonPatterns("../grammar-learning-dump/outs/no-eval-32-static/size-4")
     // testImplications
-    iterateOverBitvec("../grammar-learning-dump/outs/no-eval-32-static/size-4", 4)
+    val v = iterateOverBitvec("../grammar-learning-dump/outs/no-eval-32-static/size-4", 4)
+    println(v)
+    val x = Json.toJson(v)
+
+    val fw = new java.io.FileWriter("constraintMapping.json")
+    println(x)
+    fw.write(x.toString)
+    fw.close
+
   }
 
   def iterateOverBitvec (path : String, length : Int) = {
     val files  = new File(path).listFiles.filter(_.getName.endsWith(".smt2"))
-
     var list = scala.collection.mutable.ListBuffer.empty[Seq[Term]]
 
-    for (f <- files) {
+    var stateConstList = scala.collection.mutable.ListBuffer.empty[(String,Map[Int,String])]
+
+    for (file <- files) {
       var ctx = scala.collection.mutable.ListBuffer.empty[Command]
-      println(f)
-      val is = new java.io.FileReader(f)
+      println(file)
+      val is = new java.io.FileReader(file)
       val lexer = new smtlib.lexer.Lexer(is)
       val parser = new smtlib.parser.Parser(lexer)
 
@@ -43,8 +52,12 @@ object Example {
             cmd = parser.parseCommand
             cmd match {
               case Assert (x) => {
-                for (i <- 0 to (length - 1))
-                println(inferType(buildbvSelect(f,i), x, ctx))
+                var stateTypeMap = new scala.collection.mutable.HashMap[Int, String]
+                for (i <- 0 to (length - 1)){
+                  val m = inferType(buildbvSelect(f,i), x, ctx)
+                  stateTypeMap += (i -> m)
+                  }
+                  stateConstList += new Tuple2(file.getName, stateTypeMap.toMap)
                 }
               case _ => //println(cmd)
             }
@@ -55,6 +68,7 @@ object Example {
         cmd = parser.parseCommand
       }
     }
+    stateConstList
   }
 
   def testGetCommonPatterns (path : String) = {
@@ -75,7 +89,7 @@ object Example {
                   val v = andToVec2(stripLets(term))
                   list += v
                   }
-                case _ => 
+                case _ =>
             }
         cmd = parser.parseCommand
         }
@@ -91,7 +105,7 @@ object Example {
     val is = new java.io.FileReader("../grammar-learning-dump/outs/no-eval-32-static/size-4/constraints-822.smt2")
     val lexer = new smtlib.lexer.Lexer(is)
     val parser = new smtlib.parser.Parser(lexer)
-    
+
     var cmd = parser.parseCommand
 
     val fw = new java.io.FileWriter("testImplications.smt2")
@@ -108,24 +122,25 @@ object Example {
       cmd = parser.parseCommand
     }
 
-    fw.close    
+    fw.close
   }
 
+
   def buildbvSelect (identifier : SSymbol , position: Int) = {
-    Select(QualifiedIdentifier(SimpleIdentifier(identifier)), QualifiedIdentifier(Identifier(SSymbol("bv" + position.toString),List(SNumeral(32))), None)) 
-  
+    Select(QualifiedIdentifier(SimpleIdentifier(identifier)), QualifiedIdentifier(Identifier(SSymbol("bv" + position.toString),List(SNumeral(32))), None))
+
   }
 
   def buildAnd (t: Term) = {
     val letFcn = createLetFcn (t)
-    val woLets = stripLets (t) 
+    val woLets = stripLets (t)
     val app = grabFirstLet (t)
     letFcn (buildFunctionApplication("and", Seq(ctypeSMTGen(app, "garbage"), woLets)))
   }
 
   def buildImplication (t : Term) = {
     val letFcn = createLetFcn (t)
-    val woLets = stripLets (t) 
+    val woLets = stripLets (t)
     val app = grabFirstLet (t)
     letFcn (Implies (ctypeSMTGen(app, "garbage"), woLets))
 
@@ -139,4 +154,5 @@ object Example {
       case _ => t //TODO: Handle error
     }
   }
+
 }
