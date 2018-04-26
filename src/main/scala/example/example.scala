@@ -35,7 +35,7 @@ object Example {
     val files  = new File(path).listFiles.filter(_.getName.endsWith(".smt2"))
     var list = scala.collection.mutable.ListBuffer.empty[Seq[Term]]
 
-    var stateConstList = scala.collection.mutable.ListBuffer.empty[(String,Map[Int,String])]
+    var stateConstList = scala.collection.mutable.ListBuffer.empty[(String,Map[Int, List[Tuple2[Int, Int]]])]
 
     for (file <- files) {
       var ctx = scala.collection.mutable.ListBuffer.empty[Command]
@@ -52,7 +52,7 @@ object Example {
             cmd = parser.parseCommand
             cmd match {
               case Assert (x) => {
-                var stateTypeMap = new scala.collection.mutable.HashMap[Int, String]
+                var stateTypeMap = new scala.collection.mutable.HashMap[Int, List[Tuple2[Int, Int]]]
                 for (i <- 0 to (length - 1)){
                   val m = inferType(buildbvSelect(f,i), x, ctx)
                   stateTypeMap += (i -> m)
