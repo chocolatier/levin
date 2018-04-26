@@ -4,6 +4,9 @@ import smtlib._
 import smtlib.trees.Commands._
 import smtlib.trees.Terms._
 import theories.Core._
+import trees.Terms._
+import theories.ArraysEx._
+import theories.Ints.{IntSort, NumeralLit}
 
 import levin.Simplifications._
 
@@ -180,8 +183,39 @@ package object analysis {
             }
         } else {
             // "symbol"
-            (0x0, 0x0) :: Nil
+            var s = context.mkSolver
+            val k = context.parseSMTLIB2String(catctx + Assert (constraints).toString, null, null, null, null)
+            // println (k)
+            s.add(k)
+            var is_sat = s.check == sat
+            // println (is_sat)
+            if (is_sat) {
+                var m = s.getModel
+                var cnsts = m.getConstDecls
+                var index = getIndexFromSelect(target)
+                println (index)
+
+                var rv = (0x0, 0x0) :: Nil
+
+                for (entry <- m.getFuncInterp(cnsts(0)).getEntries()){
+                if (entry.getArgs()(0).toString == index.toString){
+                  var symb = entry.getValue.toString.toInt // XXX : TODO: Deconstruct properly
+                  rv = (symb, symb) :: Nil
+                }
+              }
+                rv
+              } else {
+                (0x0, 0x0) :: Nil
+              }
         }
+    }
+
+    def getIndexFromSelect (t : Term) = {
+
+      t match {
+        case     Select(QualifiedIdentifier(SimpleIdentifier(identifier), _), QualifiedIdentifier(Identifier(SSymbol(index),List(SNumeral(_))), None)) => {index.substring(2).toInt}
+        case _ => -1
+      }
     }
 
     // def unapplySelect (t : Term) = {
