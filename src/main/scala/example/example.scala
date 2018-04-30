@@ -24,10 +24,10 @@ object Example {
     val m = bvc.map(_._2)
     val arrangements = m.map(mapToGrammar).distinct.mkString("| ")
 
-    var notEBNF = "// List((x,y),(z,w)) specifies the closed intervals of ascii values for the terminals. E.g. List((48,57)) corresponds to 0-9"
+    var notEBNF = ""
 
     for ((k,v) <- t){
-      notEBNF += v + " = " + k.toString + "\n"
+      notEBNF += v + " = " + listToASCII(k) + "\n"
     }
 
     notEBNF += "Expr = " + arrangements
@@ -71,6 +71,24 @@ object Example {
       val newname = "g" + (n + 1).toString
       t += (f -> newname)
       newname
+    }
+  }
+
+  def listToASCII (l : List[Tuple2[Int, Int]]) = {
+    l.map(intTupToStr).mkString(" | ")
+  }
+
+  def intTupToStr(it : Tuple2[Int,Int]) = {
+    if (it._1 == it._2){
+      if (it._1 == 32) { // XXX: Rewrite so that the meta-grammar doesn't have unexpressable grammars 
+        "SPACE"
+      } else if (it._1 == 0) {
+        "NULL"
+      } else {
+        it._1.toChar.toString
+      }
+    } else {
+        ((it._1).toChar).toString ++ " ~ " ++ ((it._2).toChar).toString
     }
   }
 
