@@ -213,7 +213,9 @@ package object analysis {
     def getIndexFromSelect (t : Term) = {
 
       t match {
-        case     Select(QualifiedIdentifier(SimpleIdentifier(identifier), _), QualifiedIdentifier(Identifier(SSymbol(index),List(SNumeral(_))), None)) => {index.substring(2).toInt}
+        case     Select(QualifiedIdentifier(SimpleIdentifier(identifier), _), QualifiedIdentifier(Identifier(SSymbol(index),List(SNumeral(_))), None)) => {
+          index.substring(2).toInt
+        }
         case _ => -1
       }
     }

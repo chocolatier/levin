@@ -18,8 +18,6 @@ import play.api.libs.json._
 // Example usage of levin. (Actually just quick and dirty testing).
 object Example {
   def main (args: Array[String]): Unit = {
-    // testGetCommonPatterns("../grammar-learning-dump/outs/no-eval-32-static/size-4")
-    // testImplications
     val bvc = iterateOverBitvec("../grammar-constraint-analysis/constraints/smt2/", 3)
     val m = bvc.map(_._2)
     val arrangements = m.map(mapToGrammar).distinct.mkString("\n    | ")
@@ -82,7 +80,7 @@ object Example {
     if (it._1 == it._2){
           "'" ++ it._1.toChar.toString  ++ "'"
     } else {
-        "'" ++ ((it._1).toChar).toString ++ "'" ++ " - " ++ "'" ++ ((it._2).toChar).toString ++ "'"
+        "'" ++ ((it._1).toChar).toString ++ "' - '" ++ ((it._2).toChar).toString ++ "'"
     }
   }
 
