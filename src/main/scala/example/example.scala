@@ -20,15 +20,58 @@ object Example {
   def main (args: Array[String]): Unit = {
     // testGetCommonPatterns("../grammar-learning-dump/outs/no-eval-32-static/size-4")
     // testImplications
-    val v = iterateOverBitvec("../grammar-learning-dump/outs/no-eval-32-static/size-4", 4)
-    println(v)
-    val x = Json.toJson(v)
+    val bvc = iterateOverBitvec("../grammar-constraint-analysis/constraints/smt2/", 3)
+    val m = bvc.map(_._2)
+    val arrangements = m.map(mapToGrammar).distinct.mkString("| ")
+
+    var notEBNF = "// List((x,y),(z,w)) specifies the closed intervals of ascii values for the terminals. E.g. List((48,57)) corresponds to 0-9"
+
+    for ((k,v) <- t){
+      notEBNF += v + " = " + k.toString + "\n"
+    }
+
+    notEBNF += "Expr = " + arrangements
+
+    println(notEBNF)
+
+    val x = Json.toJson(bvc)
 
     val fw = new java.io.FileWriter("constraintMapping.json")
-    println(x)
     fw.write(x.toString)
     fw.close
 
+    val fw2 = new java.io.FileWriter("grammar.notebnf")
+    fw2.write(notEBNF)
+    fw2.close
+
+
+  }
+
+  var t = new scala.collection.mutable.HashMap[List[Tuple2[Int, Int]], String]
+
+  def mapToGrammar (m : Map[Int, List[Tuple2[Int, Int]]]) = {
+    val seq = m.toSeq.sortBy(_._1)
+
+    var gram = ""
+
+    for (g <- seq){
+        gram += t.get(g._2).getOrElse(generateNewName(g._2)) + " "
+    }
+    gram
+  }
+
+  def generateNewName(f: List[Tuple2[Int, Int]]) = {
+    val taken = t.values.toList.sorted
+    // println(taken)
+    if (taken.isEmpty){
+      t += (f -> "g0")
+      "g0"
+    } else {
+      val n = taken.last.filter(_.isDigit).toInt
+      val newname = "g" + (n + 1).toString
+      t += (f -> newname)
+      newname
+    }
   }
 
   def iterateOverBitvec (path : String, length : Int) = {
