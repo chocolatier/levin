@@ -22,7 +22,7 @@ object Example {
     // testImplications
     val bvc = iterateOverBitvec("../grammar-constraint-analysis/constraints/smt2/", 3)
     val m = bvc.map(_._2)
-    val arrangements = m.map(mapToGrammar).distinct.mkString("| ")
+    val arrangements = m.map(mapToGrammar).distinct.mkString("\n    | ")
 
     var notEBNF = ""
 
@@ -30,7 +30,7 @@ object Example {
       notEBNF += v + " = " + listToASCII(k) + "\n"
     }
 
-    notEBNF += "Expr = " + arrangements
+    notEBNF += "Expr\n    = " + arrangements
 
     println(notEBNF)
 
@@ -80,15 +80,9 @@ object Example {
 
   def intTupToStr(it : Tuple2[Int,Int]) = {
     if (it._1 == it._2){
-      if (it._1 == 32) { // XXX: Rewrite so that the meta-grammar doesn't have unexpressable grammars 
-        "SPACE"
-      } else if (it._1 == 0) {
-        "NULL"
-      } else {
-        it._1.toChar.toString
-      }
+          "'" ++ it._1.toChar.toString  ++ "'"
     } else {
-        ((it._1).toChar).toString ++ " ~ " ++ ((it._2).toChar).toString
+        "'" ++ ((it._1).toChar).toString ++ "'" ++ " - " ++ "'" ++ ((it._2).toChar).toString ++ "'"
     }
   }
 
