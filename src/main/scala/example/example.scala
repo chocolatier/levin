@@ -78,7 +78,11 @@ object Example {
 
   def intTupToStr(it : Tuple2[Int,Int]) = {
     if (it._1 == it._2){
-          "'" ++ it._1.toChar.toString  ++ "'"
+          if (it._1 == 0) {
+            "'\\0'"
+          } else {
+            "'" ++ it._1.toChar.toString  ++ "'"
+          }
     } else {
         "'" ++ ((it._1).toChar).toString ++ "' - '" ++ ((it._2).toChar).toString ++ "'"
     }
@@ -105,8 +109,12 @@ object Example {
             cmd = parser.parseCommand
             cmd match {
               case Assert (x) => {
-                val length2 = inferMaxIndex(x)
-                println("l2 is: " + length2.toString)
+                val length2 =
+                  if (file.getName contains "constraints-0.smt2"){
+                    0
+                  } else {
+                    inferMaxIndex(x)
+                  }
                 // println(x)
                 var stateTypeMap = new scala.collection.mutable.HashMap[Int, List[Tuple2[Int, Int]]]
                 for (i <- 0 to length2) {
