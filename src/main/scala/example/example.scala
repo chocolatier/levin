@@ -18,7 +18,7 @@ import play.api.libs.json._
 // Example usage of levin. (Actually just quick and dirty testing).
 object Example {
   def main (args: Array[String]): Unit = {
-    val bvc = iterateOverBitvec("../grammar-constraint-analysis/constraints/smt2/", 3)
+    val bvc = buildGrammarVec("../grammar-constraint-analysis/constraints/smt2/")
     val m = bvc.map(_._2)
     val arrangements = m.map(mapToGrammar).distinct.mkString("\n    | ")
 
@@ -88,51 +88,58 @@ object Example {
     }
   }
 
-  def iterateOverBitvec (path : String, length : Int) = {
+  def buildGrammarVec (path : String) = {
     val files  = new File(path).listFiles.filter(_.getName.endsWith(".smt2"))
     var list = scala.collection.mutable.ListBuffer.empty[Seq[Term]]
 
     var stateConstList = scala.collection.mutable.ListBuffer.empty[(String,Map[Int, List[Tuple2[Int, Int]]])]
 
     for (file <- files) {
-      var ctx = scala.collection.mutable.ListBuffer.empty[Command]
-      println(file)
-      val is = new java.io.FileReader(file)
-      val lexer = new smtlib.lexer.Lexer(is)
-      val parser = new smtlib.parser.Parser(lexer)
-
-      var cmd = parser.parseCommand
-      while (cmd != null) {
-        cmd match {
-          case DeclareFun (f, g, h) => {
-            ctx += cmd
-            cmd = parser.parseCommand
-            cmd match {
-              case Assert (x) => {
-                val length2 =
-                  if (file.getName contains "constraints-0.smt2"){
-                    0
-                  } else {
-                    inferMaxIndex(x)
-                  }
-                // println(x)
-                var stateTypeMap = new scala.collection.mutable.HashMap[Int, List[Tuple2[Int, Int]]]
-                for (i <- 0 to length2) {
-                  val m = inferType(buildbvSelect(f,i), x, ctx)
-                  stateTypeMap += (i -> m)
-                  }
-                  stateConstList += new Tuple2(file.getName, stateTypeMap.toMap)
-                }
-              case _ => //println(cmd)
-            }
-          }
-          case Assert (x) => // println("asdf")
-          case _ => ctx += cmd
-        }
-        cmd = parser.parseCommand
-      }
+      println("processing " + file)
+      stateConstList += constructStateTypeMap(file)
     }
     stateConstList
+  }
+
+  def constructStateTypeMap (file : File) = {
+
+    var ctx = scala.collection.mutable.ListBuffer.empty[Command]
+    val is = new java.io.FileReader(file)
+    val lexer = new smtlib.lexer.Lexer(is)
+    val parser = new smtlib.parser.Parser(lexer)
+
+    var cmd = parser.parseCommand
+
+    var stateTypeMap = new scala.collection.mutable.HashMap[Int, List[Tuple2[Int, Int]]]
+
+    while (cmd != null) {
+      cmd match {
+        case DeclareFun (f, g, h) => {
+          ctx += cmd
+          cmd = parser.parseCommand
+          cmd match {
+            case Assert (x) => {
+
+              val maxIndex =
+                if (file.getName contains "constraints-0.smt2"){
+                  0
+                } else {
+                  inferMaxIndex(x)
+                }
+
+              for (i <- 0 to maxIndex) {
+                val m = inferType(buildbvSelect(f,i), x, ctx)
+                stateTypeMap += (i -> m)
+                }
+              }
+            case _ => {}
+          }
+        }
+        case _ => ctx += cmd
+      }
+      cmd = parser.parseCommand
+    }
+    Tuple2(file.getName, stateTypeMap.toMap)
   }
 
   // Assumption: Length is there within a let statement

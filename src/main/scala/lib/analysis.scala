@@ -193,7 +193,7 @@ package object analysis {
                 var m = s.getModel
                 var cnsts = m.getConstDecls
                 var index = getIndexFromSelect(target)
-                println (index)
+                // println (index)
 
                 var rv = (0x0, 0x0) :: Nil
 
