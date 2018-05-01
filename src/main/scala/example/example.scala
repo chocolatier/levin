@@ -42,7 +42,6 @@ object Example {
     fw2.write(notEBNF)
     fw2.close
 
-
   }
 
   var t = new scala.collection.mutable.HashMap[List[Tuple2[Int, Int]], String]
