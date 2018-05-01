@@ -45,10 +45,8 @@ package object analysis {
             var olds = m.getOrElse(fT, Seq())
             m += (fT -> (s+:olds))
         }
-
         m
     }
-
 
     // Gets patterns common between constraint sets
     def getCommonPatterns (tss : Seq[Seq[Term]]) = {
@@ -70,25 +68,6 @@ package object analysis {
         }
 
         m
-    }
-
-    // TODO : Implememnt
-    // Checks which types are valid
-    // TODO: Figure out why $a \implies b$ for disjoint $a, b$ still gives me sat.
-    def typeSubsetCheck (t : Term) : Seq[String] = {
-        val v = getVar (t)
-        val ctypeFcns = Seq("isdigit", "isxdigit", "isalph", "isalphnum").map(ctypeSMTGen(v, _)).map(Implies(_,t))
-
-        //TODO: Use an SMT Solver to check.
-        // Something to the effect of
-        // ctypeFcns.filter(z3.isSatisfiable)
-
-        Seq("digit")
-    }
-
-    //TODO: Implement
-    def getVar (t : Term) = {
-        t
     }
 
     //Generates SMT Constraints corresponding to a function in ctype.h
@@ -219,31 +198,4 @@ package object analysis {
         case _ => -1
       }
     }
-
-    // def unapplySelect (t : Term) = {
-    //     t match {
-    //         Select(m, NumeralLit(x)) => x
-    //         _ => -1
-    //     }
-    // }
-
-    // def identifyByte (constraints : Term , context : Term) = {
-    //     varAliases = listLets (context)
-
-    // }
-
-    // def splitByByte (constraints : Seq[Term]) = {
-    //     var m  = new scala.collection.map.mutable.HashMap[Int, Seq[Term]]
-    //     constraints.foldl (0) { (m, t) =>
-    //         val b = identifyByte(t, t)
-    //         olds = m.getOrElse(b, Seq())
-    //         m += (b, olds::t)
-
-    //     }
-    // }
-
-    // def buildConstraintGraph( constraints : Seq[Term]) = {
-
-
-    // }
 }
