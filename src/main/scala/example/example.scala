@@ -105,8 +105,11 @@ object Example {
             cmd = parser.parseCommand
             cmd match {
               case Assert (x) => {
+                val length2 = inferMaxIndex(x)
+                println("l2 is: " + length2.toString)
+                // println(x)
                 var stateTypeMap = new scala.collection.mutable.HashMap[Int, List[Tuple2[Int, Int]]]
-                for (i <- 0 to (length - 1)){
+                for (i <- 0 to length2) {
                   val m = inferType(buildbvSelect(f,i), x, ctx)
                   stateTypeMap += (i -> m)
                   }
@@ -122,6 +125,16 @@ object Example {
       }
     }
     stateConstList
+  }
+
+  // Assumption: Length is there within a let statement
+  // Returns the length - 1
+  def inferMaxIndex(t : Term) = {
+    listLets(t).map(lengthFromVarBinding).max
+  }
+
+  def lengthFromVarBinding (vb : VarBinding) = {
+    getIndexFromSelect (vb.term)
   }
 
   def testGetCommonPatterns (path : String) = {
