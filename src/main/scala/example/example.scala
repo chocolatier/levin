@@ -16,11 +16,24 @@ import levin.GrammarInference._
 
 import play.api.libs.json._
 
+import scala.io.Source
+
 // Example usage of levin. (Actually just quick and dirty testing).
 object Example {
   def main (args: Array[String]): Unit = {
+
+    val disjPath = "../grammar-constraint-analysis/state_analysis/disjunct.json"
+    val disjFile = Source.fromFile(disjPath).getLines.mkString
+
+    val disj = Json.parse(disjFile).as[List[List[Int]]]
+
+
     val bvc = buildGrammarVec("../grammar-constraint-analysis/constraints/smt2/")
-    val m = bvc.map(_._2)
+
+    val svc = simplifyGrammarVec(bvc.toList, disj)
+
+    val m = svc
+    // val m = bvc.map(_._2)
     val arrangements = m.map(mapToGrammar).distinct.mkString("\n    | ")
 
     var notEBNF = ""
