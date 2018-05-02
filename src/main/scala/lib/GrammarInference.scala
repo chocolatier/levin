@@ -23,9 +23,15 @@ object GrammarInference {
     var gram = ""
 
     for (g <- seq){
-        gram += t.get(g._2).getOrElse(generateNewName(g._2)) + " "
+        gram += getName(g._2)
     }
     gram
+  }
+
+  def getName (f : List[Tuple2[Int, Int]]) = {
+    val sorted_f = f.sorted
+
+    t.get(sorted_f).getOrElse(generateNewName(sorted_f)) + " "
   }
 
   def generateNewName(f: List[Tuple2[Int, Int]]) = {
@@ -86,7 +92,6 @@ object GrammarInference {
       println("processing " + file)
       stateConstList += constructStateTypeMap(file)
     }
-    println (stateConstList)
     stateConstList
   }
 
