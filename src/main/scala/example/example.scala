@@ -20,7 +20,7 @@ object Example {
   def main (args: Array[String]): Unit = {
     // testGetCommonPatterns("../grammar-learning-dump/outs/no-eval-32-static/size-4")
     // testImplications
-    iterateOverBitvec("../grammar-learning-dump/outs/no-eval-32-static/size-4", 4)
+    iterateOverBitvec("../grammar-learning-dump/outs/no-eval-32-hex-static/size-1", 1)
   }
 
   def iterateOverBitvec (path : String, length : Int) = {

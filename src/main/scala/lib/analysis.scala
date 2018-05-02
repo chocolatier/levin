@@ -130,6 +130,8 @@ package object analysis {
     // TODO: Replace calculus of intersections with proper subset checks. 
     // TODO: Figure out a way to not have everything to parse to (assert true)
     def inferType (target : Term, constraints: Term, ctx: Seq[Command]) = {
+        var rv = "null" //Workaround to bare strings not always returning and return keyword giving multiple erros
+ 
         val alphanum_check = Assert (buildFunctionApplication("and", Seq(ctypeSMTGen(target, "isalphnum"), constraints)))
         var context = new Context();
 
@@ -142,41 +144,40 @@ package object analysis {
         val is_alphanum = solver.check() == sat
 
         if (is_alphanum) {
-            val not_xdigit_check = Assert (Not (buildFunctionApplication("and",  Seq(ctypeSMTGen(target, "isxdigit"), constraints))))
+            val not_xdigit_check = Assert (buildFunctionApplication("and",  Seq(ctypeSMTGen(target, "isxdigit"), constraints)))
             val digit_check = Assert (buildFunctionApplication("and", Seq(ctypeSMTGen(target, "isdigit"), constraints)))
             val alpha_check = Assert (buildFunctionApplication("and", Seq(ctypeSMTGen(target, "isalph"), constraints)))
 
             val xdigitExpr = context.parseSMTLIB2String(catctx + not_xdigit_check.toString, null, null, null, null)
             val xdsolver = context.mkSolver
             xdsolver.add(xdigitExpr)
-            val is_notxdigit = xdsolver.check() == sat 
+            val is_xdigit = xdsolver.check() == sat 
+            println("xdigit_: " + is_xdigit)
 
             val alphaExpr = context.parseSMTLIB2String(catctx + alpha_check.toString, null, null, null, null)
             solver.add(alphaExpr)
             val is_alpha = solver.check() == sat 
 
+            println("is_alpha_:" + is_alpha)
             val dsolver = context.mkSolver
 
             val digitExpr = context.parseSMTLIB2String(catctx + not_xdigit_check.toString, null, null, null, null)
             dsolver.add(digitExpr)
             val is_digit = dsolver.check() == sat 
-
-            if (is_digit && is_alpha){
-                if (is_notxdigit){
-                    "alphanum"
+            if (is_xdigit){
+                if (!is_alpha){
+                rv = "digit"
+                } else if (!is_digit){
+                rv = "alpha"
                 } else {
-                    "xdigit"
+                rv = "xdigit"
                 }
             }
-
-            if (is_digit) {
-                "digit"
-            } else {
-                "alpha"
-            }            
+        
         } else {
-            "symbol"
+            rv ="symbol"
         }
+        rv
     }   
 
     // def unapplySelect (t : Term) = {
