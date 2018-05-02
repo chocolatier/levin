@@ -146,7 +146,6 @@ package object analysis {
             solver.add(alphaExpr)
             val is_alpha = solver.check() == sat
 
-            println("is_alpha_:" + is_alpha)
             val dsolver = context.mkSolver
 
             val digitExpr = context.parseSMTLIB2String(catctx + digit_check.toString, null, null, null, null)
@@ -170,15 +169,12 @@ package object analysis {
             // rv ="symbol"
             var s = context.mkSolver
             val k = context.parseSMTLIB2String(catctx + Assert (constraints).toString, null, null, null, null)
-            // println (k)
             s.add(k)
             var is_sat = s.check == sat
-            // println (is_sat)
             if (is_sat) {
                 var m = s.getModel
                 var cnsts = m.getConstDecls
                 var index = getIndexFromSelect(target)
-                // println (index)
 
                 rv = (0x0, 0x0) :: Nil
 
