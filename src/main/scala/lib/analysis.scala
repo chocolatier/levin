@@ -4,6 +4,9 @@ import smtlib._
 import smtlib.trees.Commands._
 import smtlib.trees.Terms._
 import theories.Core._
+import trees.Terms._
+import theories.ArraysEx._
+import theories.Ints.{IntSort, NumeralLit}
 
 import levin.Simplifications._
 
@@ -11,15 +14,15 @@ import com.microsoft.z3._
 
 package object analysis {
 
-    // A rose tree to store the applied functions. 
+    // A rose tree to store the applied functions.
     case class fcnTree (node : String, children : Seq[fcnTree])
 
-    // Generate trees to classify 
+    // Generate trees to classify
 
-    // Returns the name of the applied function and the terms it is applied to. 
+    // Returns the name of the applied function and the terms it is applied to.
     def unapplyFunction (t : Term) = {
         t match {
-            case  FunctionApplication (QualifiedIdentifier(Identifier(SSymbol(str),_),_), terms) => new Tuple2 (str, terms) 
+            case  FunctionApplication (QualifiedIdentifier(Identifier(SSymbol(str),_),_), terms) => new Tuple2 (str, terms)
             case _ => {
                 new Tuple2 ("NON FUNCTION", Seq())
                 }
@@ -33,7 +36,7 @@ package object analysis {
     }
 
 
-    // Classifies each term in a series of terms according to the function tree. 
+    // Classifies each term in a series of terms according to the function tree.
     def classify (ts : Seq[Term]) = {
         var m = new scala.collection.mutable.HashMap[fcnTree, Seq[Term]]
         for (t <- ts) {
@@ -42,10 +45,8 @@ package object analysis {
             var olds = m.getOrElse(fT, Seq())
             m += (fT -> (s+:olds))
         }
-
         m
     }
-
 
     // Gets patterns common between constraint sets
     def getCommonPatterns (tss : Seq[Seq[Term]]) = {
@@ -53,10 +54,10 @@ package object analysis {
         classified.reduceRight((a, b) => a.intersect(b))
     }
 
-    // Calculates how frequently a pattern appears 
+    // Calculates how frequently a pattern appears
     def patternFrequency (tss : Seq[Seq[Term]])  = {
         val classified = tss.map(classify).map(a => a.keySet)
-        
+
         var m = new scala.collection.mutable.HashMap[fcnTree, Int]
 
         for (c <- classified){
@@ -69,26 +70,7 @@ package object analysis {
         m
     }
 
-    // TODO : Implememnt
-    // Checks which types are valid
-    // TODO: Figure out why $a \implies b$ for disjoint $a, b$ still gives me sat. 
-    def typeSubsetCheck (t : Term) : Seq[String] = {
-        val v = getVar (t) 
-        val ctypeFcns = Seq("isdigit", "isxdigit", "isalph", "isalphnum").map(ctypeSMTGen(v, _)).map(Implies(_,t))
-
-        //TODO: Use an SMT Solver to check. 
-        // Something to the effect of 
-        // ctypeFcns.filter(z3.isSatisfiable)
-
-        Seq("digit")
-    }
-    
-    //TODO: Implement
-    def getVar (t : Term) = {
-        t
-    }
-
-    //Generates SMT Constraints corresponding to a function in ctype.h 
+    //Generates SMT Constraints corresponding to a function in ctype.h
     def ctypeSMTGen (t : Term, fcn: String) : Term = {
         fcn match {
             case "isdigit" => rangeCheck(48,57,t)
@@ -96,12 +78,12 @@ package object analysis {
             case "isxdigit" => buildFunctionApplication ("or", Seq(ctypeSMTGen(t, "isdigit"),
                 ctypeSMTGen(t, "isxletter")))
             case "isxletter" => buildFunctionApplication("or", Seq(ctypeSMTGen(t,"isxletterL"),
-                                ctypeSMTGen(t, "isxletterU"))) 
+                                ctypeSMTGen(t, "isxletterU")))
             case "isxletterU" => rangeCheck(65,70, t)
             case "isxletterL" => rangeCheck(97,102, t)
-            case "isalph" => buildFunctionApplication ("or", Seq (rangeCheck(65,90,t), 
+            case "isalph" => buildFunctionApplication ("or", Seq (rangeCheck(65,90,t),
                                 rangeCheck(97, 122, t)))
-            case "isalphnum" => buildFunctionApplication("or", Seq (ctypeSMTGen(t, "isalph"), 
+            case "isalphnum" => buildFunctionApplication("or", Seq (ctypeSMTGen(t, "isalph"),
                                 ctypeSMTGen(t, "isdigit")))
             case _ => t
         }
@@ -110,28 +92,26 @@ package object analysis {
     // Returns l <= t <= u
     // TODO: Unhardcode width
     def rangeCheck (l : BigInt, u : BigInt, t : Term) = {
-        buildFunctionApplication("and", 
-                Seq(buildFunctionApplication("bvsle", Seq(t,constBitVec(u,8))), 
+        buildFunctionApplication("and",
+                Seq(buildFunctionApplication("bvsle", Seq(t,constBitVec(u,8))),
                 buildFunctionApplication("bvsge", Seq(t,constBitVec(l,8)))))
     }
 
     def constBitVec (n : BigInt, w: Int)  = {
         QualifiedIdentifier (Identifier (SSymbol ("bv" + n.toString), List(SNumeral(w))), None)
-        
+
     }
 
     def buildFunctionApplication (fcn : String, ts: Seq[Term]) : Term = {
         FunctionApplication (QualifiedIdentifier (Identifier (SSymbol (fcn), List()), None), ts)
     }
-     
 
-    // Type inference 
+
+    // Type inference
     // TODO: Replace ifs with global structure check
-    // TODO: Replace calculus of intersections with proper subset checks. 
+    // TODO: Replace calculus of intersections with proper subset checks.
     // TODO: Figure out a way to not have everything to parse to (assert true)
-    def inferType (target : Term, constraints: Term, ctx: Seq[Command]) = {
-        var rv = "null" //Workaround to bare strings not always returning and return keyword giving multiple erros
- 
+    def inferType (target : Term, constraints: Term, ctx: Seq[Command]) : List[Tuple2[Int,Int]] = {
         val alphanum_check = Assert (buildFunctionApplication("and", Seq(ctypeSMTGen(target, "isalphnum"), constraints)))
         var context = new Context();
 
@@ -143,67 +123,86 @@ package object analysis {
         solver.add(bExpr)
         val is_alphanum = solver.check() == sat
 
+        var rv = List[Tuple2[Int,Int]]()
+
         if (is_alphanum) {
-            val not_xdigit_check = Assert (buildFunctionApplication("and",  Seq(ctypeSMTGen(target, "isxdigit"), constraints)))
+            val xdigit_check = Assert (buildFunctionApplication("and", Seq(ctypeSMTGen(target, "isxdigit"), constraints)))
             val digit_check = Assert (buildFunctionApplication("and", Seq(ctypeSMTGen(target, "isdigit"), constraints)))
             val alpha_check = Assert (buildFunctionApplication("and", Seq(ctypeSMTGen(target, "isalph"), constraints)))
+            val not_xletter_check = Assert (buildFunctionApplication("and", Seq(Not (ctypeSMTGen(target, "isxletter")), constraints)))
 
-            val xdigitExpr = context.parseSMTLIB2String(catctx + not_xdigit_check.toString, null, null, null, null)
+            val xlExpr = context.parseSMTLIB2String(catctx + not_xletter_check.toString, null, null, null, null)
+
+            val xlsolver = context.mkSolver
+            xlsolver.add(xlExpr)
+            val is_not_xletter = xlsolver.check() == sat
+
+            val xdigitExpr = context.parseSMTLIB2String(catctx + xdigit_check.toString, null, null, null, null)
             val xdsolver = context.mkSolver
             xdsolver.add(xdigitExpr)
-            val is_xdigit = xdsolver.check() == sat 
-            println("xdigit_: " + is_xdigit)
+            val is_xdigit = xdsolver.check() == sat
 
             val alphaExpr = context.parseSMTLIB2String(catctx + alpha_check.toString, null, null, null, null)
             solver.add(alphaExpr)
-            val is_alpha = solver.check() == sat 
+            val is_alpha = solver.check() == sat
 
             println("is_alpha_:" + is_alpha)
             val dsolver = context.mkSolver
 
-            val digitExpr = context.parseSMTLIB2String(catctx + not_xdigit_check.toString, null, null, null, null)
+            val digitExpr = context.parseSMTLIB2String(catctx + digit_check.toString, null, null, null, null)
             dsolver.add(digitExpr)
             val is_digit = dsolver.check() == sat 
             if (is_xdigit){
                 if (!is_alpha){
-                rv = "digit"
-                } else if (!is_digit){
-                rv = "alpha"
+                    // "digit"
+                    rv = (0x30, 0x39) :: Nil
+
+                } else if (is_not_xletter){
+                    // "alpha"
+                     rv = (0x41, 0x5A) :: (0x61, 0x7A) :: Nil
                 } else {
-                rv = "xdigit"
+                    // "xdigit"
+                    rv = (0x41, 0x46) :: (0x61, 0x66) :: (0x30, 0x39) :: Nil
                 }
             }
         
         } else {
-            rv ="symbol"
+            // rv ="symbol"
+            var s = context.mkSolver
+            val k = context.parseSMTLIB2String(catctx + Assert (constraints).toString, null, null, null, null)
+            // println (k)
+            s.add(k)
+            var is_sat = s.check == sat
+            // println (is_sat)
+            if (is_sat) {
+                var m = s.getModel
+                var cnsts = m.getConstDecls
+                var index = getIndexFromSelect(target)
+                // println (index)
+
+                rv = (0x0, 0x0) :: Nil
+
+                for (entry <- m.getFuncInterp(cnsts(0)).getEntries()){
+                if (entry.getArgs()(0).toString == index.toString){
+                  var symb = entry.getValue.toString.toInt // XXX : TODO: Deconstruct properly
+                  rv = (symb, symb) :: Nil
+                }
+              }
+                rv
+              } else {
+                (0x0, 0x0) :: Nil
+              }
         }
         rv
     }   
 
-    // def unapplySelect (t : Term) = {
-    //     t match {
-    //         Select(m, NumeralLit(x)) => x 
-    //         _ => -1
-    //     }
-    // }
+    def getIndexFromSelect (t : Term) = {
 
-    // def identifyByte (constraints : Term , context : Term) = {
-    //     varAliases = listLets (context)
-
-    // }
-
-    // def splitByByte (constraints : Seq[Term]) = {
-    //     var m  = new scala.collection.map.mutable.HashMap[Int, Seq[Term]]
-    //     constraints.foldl (0) { (m, t) => 
-    //         val b = identifyByte(t, t)
-    //         olds = m.getOrElse(b, Seq())
-    //         m += (b, olds::t)
-
-    //     }
-    // }
-
-    // def buildConstraintGraph( constraints : Seq[Term]) = {
-        
-
-    // }
+      t match {
+        case Select(QualifiedIdentifier(SimpleIdentifier(identifier), _), QualifiedIdentifier(Identifier(SSymbol(index),List(SNumeral(_))), None)) => {
+          index.substring(2).toInt
+        }
+        case _ => -1
+      }
+    }
 }

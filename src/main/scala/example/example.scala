@@ -13,48 +13,142 @@ import theories.Ints.{IntSort, NumeralLit}
 import levin.Transformations._
 import levin.analysis._
 
-
+import play.api.libs.json._
 
 // Example usage of levin. (Actually just quick and dirty testing).
 object Example {
   def main (args: Array[String]): Unit = {
-    // testGetCommonPatterns("../grammar-learning-dump/outs/no-eval-32-static/size-4")
-    // testImplications
-    iterateOverBitvec("../grammar-learning-dump/outs/no-eval-32-hex-static/size-1", 1)
+    val bvc = buildGrammarVec("../grammar-constraint-analysis/constraints/smt2/")
+    val m = bvc.map(_._2)
+    val arrangements = m.map(mapToGrammar).distinct.mkString("\n    | ")
+
+    var notEBNF = ""
+
+    for ((k,v) <- t){
+      notEBNF += v + " = " + listToASCII(k) + "\n"
+    }
+
+    notEBNF += "Expr\n    = " + arrangements
+
+    println(notEBNF)
+
+    val x = Json.toJson(bvc)
+
+    val fw = new java.io.FileWriter("constraintMapping.json")
+    fw.write(x.toString)
+    fw.close
+
+    val fw2 = new java.io.FileWriter("grammar.notebnf")
+    fw2.write(notEBNF)
+    fw2.close
+
   }
 
-  def iterateOverBitvec (path : String, length : Int) = {
-    val files  = new File(path).listFiles.filter(_.getName.endsWith(".smt2"))
+  var t = new scala.collection.mutable.HashMap[List[Tuple2[Int, Int]], String]
 
+  def mapToGrammar (m : Map[Int, List[Tuple2[Int, Int]]]) = {
+    val seq = m.toSeq.sortBy(_._1)
+
+    var gram = ""
+
+    for (g <- seq){
+        gram += t.get(g._2).getOrElse(generateNewName(g._2)) + " "
+    }
+    gram
+  }
+
+  def generateNewName(f: List[Tuple2[Int, Int]]) = {
+    val taken = t.values.toList.sorted
+    // println(taken)
+    if (taken.isEmpty){
+      t += (f -> "g0")
+      "g0"
+    } else {
+      val n = taken.last.filter(_.isDigit).toInt
+      val newname = "g" + (n + 1).toString
+      t += (f -> newname)
+      newname
+    }
+  }
+
+  def listToASCII (l : List[Tuple2[Int, Int]]) = {
+    l.map(intTupToStr).mkString(" | ")
+  }
+
+  def intTupToStr(it : Tuple2[Int,Int]) = {
+    if (it._1 == it._2){
+          if (it._1 == 0) {
+            "'\\0'"
+          } else {
+            "'" ++ it._1.toChar.toString  ++ "'"
+          }
+    } else {
+        "'" ++ ((it._1).toChar).toString ++ "' - '" ++ ((it._2).toChar).toString ++ "'"
+    }
+  }
+
+  def buildGrammarVec (path : String) = {
+    val files  = new File(path).listFiles.filter(_.getName.endsWith(".smt2"))
     var list = scala.collection.mutable.ListBuffer.empty[Seq[Term]]
 
-    for (f <- files) {
-      var ctx = scala.collection.mutable.ListBuffer.empty[Command]
-      println(f)
-      val is = new java.io.FileReader(f)
-      val lexer = new smtlib.lexer.Lexer(is)
-      val parser = new smtlib.parser.Parser(lexer)
+    var stateConstList = scala.collection.mutable.ListBuffer.empty[(String,Map[Int, List[Tuple2[Int, Int]]])]
 
-      var cmd = parser.parseCommand
-      while (cmd != null) {
-        cmd match {
-          case DeclareFun (f, g, h) => {
-            ctx += cmd
-            cmd = parser.parseCommand
-            cmd match {
-              case Assert (x) => {
-                for (i <- 0 to (length - 1))
-                println(inferType(buildbvSelect(f,i), x, ctx))
-                }
-              case _ => //println(cmd)
-            }
-          }
-          case Assert (x) => // println("asdf")
-          case _ => ctx += cmd
-        }
-        cmd = parser.parseCommand
-      }
+    for (file <- files) {
+      println("processing " + file)
+      stateConstList += constructStateTypeMap(file)
     }
+    stateConstList
+  }
+
+  def constructStateTypeMap (file : File) = {
+
+    var ctx = scala.collection.mutable.ListBuffer.empty[Command]
+    val is = new java.io.FileReader(file)
+    val lexer = new smtlib.lexer.Lexer(is)
+    val parser = new smtlib.parser.Parser(lexer)
+
+    var cmd = parser.parseCommand
+
+    var stateTypeMap = new scala.collection.mutable.HashMap[Int, List[Tuple2[Int, Int]]]
+
+    while (cmd != null) {
+      cmd match {
+        case DeclareFun (f, g, h) => {
+          ctx += cmd
+          cmd = parser.parseCommand
+          cmd match {
+            case Assert (x) => {
+
+              val maxIndex =
+                if (file.getName contains "constraints-0.smt2"){
+                  0
+                } else {
+                  inferMaxIndex(x)
+                }
+
+              for (i <- 0 to maxIndex) {
+                val m = inferType(buildbvSelect(f,i), x, ctx)
+                stateTypeMap += (i -> m)
+                }
+              }
+            case _ => {}
+          }
+        }
+        case _ => ctx += cmd
+      }
+      cmd = parser.parseCommand
+    }
+    Tuple2(file.getName, stateTypeMap.toMap)
+  }
+
+  // Assumption: Length is there within a let statement
+  // Returns the length - 1
+  def inferMaxIndex(t : Term) = {
+    listLets(t).map(lengthFromVarBinding).max
+  }
+
+  def lengthFromVarBinding (vb : VarBinding) = {
+    getIndexFromSelect (vb.term)
   }
 
   def testGetCommonPatterns (path : String) = {
@@ -75,7 +169,7 @@ object Example {
                   val v = andToVec2(stripLets(term))
                   list += v
                   }
-                case _ => 
+                case _ =>
             }
         cmd = parser.parseCommand
         }
@@ -91,7 +185,7 @@ object Example {
     val is = new java.io.FileReader("../grammar-learning-dump/outs/no-eval-32-static/size-4/constraints-822.smt2")
     val lexer = new smtlib.lexer.Lexer(is)
     val parser = new smtlib.parser.Parser(lexer)
-    
+
     var cmd = parser.parseCommand
 
     val fw = new java.io.FileWriter("testImplications.smt2")
@@ -108,24 +202,25 @@ object Example {
       cmd = parser.parseCommand
     }
 
-    fw.close    
+    fw.close
   }
 
+
   def buildbvSelect (identifier : SSymbol , position: Int) = {
-    Select(QualifiedIdentifier(SimpleIdentifier(identifier)), QualifiedIdentifier(Identifier(SSymbol("bv" + position.toString),List(SNumeral(32))), None)) 
-  
+    Select(QualifiedIdentifier(SimpleIdentifier(identifier)), QualifiedIdentifier(Identifier(SSymbol("bv" + position.toString),List(SNumeral(32))), None))
+
   }
 
   def buildAnd (t: Term) = {
     val letFcn = createLetFcn (t)
-    val woLets = stripLets (t) 
+    val woLets = stripLets (t)
     val app = grabFirstLet (t)
     letFcn (buildFunctionApplication("and", Seq(ctypeSMTGen(app, "garbage"), woLets)))
   }
 
   def buildImplication (t : Term) = {
     val letFcn = createLetFcn (t)
-    val woLets = stripLets (t) 
+    val woLets = stripLets (t)
     val app = grabFirstLet (t)
     letFcn (Implies (ctypeSMTGen(app, "garbage"), woLets))
 
@@ -139,4 +234,5 @@ object Example {
       case _ => t //TODO: Handle error
     }
   }
+
 }
