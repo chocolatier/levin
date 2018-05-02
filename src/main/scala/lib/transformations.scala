@@ -3,8 +3,14 @@ package levin
 import smtlib._
 import smtlib.trees.Commands._
 import smtlib.trees.Terms._
+import theories.Core._
+import trees.Terms._
+import theories.ArraysEx._
+import theories.Ints.{IntSort, NumeralLit}
 
 import scala.collection.mutable.ListBuffer
+
+import levin.analysis._
 
 package object Transformations {
 
@@ -80,4 +86,35 @@ package object Transformations {
         case x => x::Nil
       }
     }
+
+    
+  def buildbvSelect (identifier : SSymbol , position: Int) = {
+    Select(QualifiedIdentifier(SimpleIdentifier(identifier)), QualifiedIdentifier(Identifier(SSymbol("bv" + position.toString),List(SNumeral(32))), None))
+
+  }
+
+  def buildAnd (t: Term) = {
+    val letFcn = createLetFcn (t)
+    val woLets = stripLets (t)
+    val app = grabFirstLet (t)
+    letFcn (buildFunctionApplication("and", Seq(ctypeSMTGen(app, "garbage"), woLets)))
+  }
+
+  def buildImplication (t : Term) = {
+    val letFcn = createLetFcn (t)
+    val woLets = stripLets (t)
+    val app = grabFirstLet (t)
+    letFcn (Implies (ctypeSMTGen(app, "garbage"), woLets))
+
+  }
+
+  def grabFirstLet (t : Term) = {
+    t match {
+      case Let (VarBinding(_,v), _, _) => {
+        v
+        }
+      case _ => t //TODO: Handle error
+    }
+  }
+
 }

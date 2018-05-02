@@ -8,6 +8,8 @@ import trees.Terms._
 import theories.ArraysEx._
 import theories.Ints.{IntSort, NumeralLit}
 
+import levin.Transformations._
+
 import com.microsoft.z3._
 
 package object analysis {
@@ -198,4 +200,15 @@ package object analysis {
         case _ => -1
       }
     }
+
+    // Assumption: Length is there within a let statement
+    // Returns the length - 1
+    def inferMaxIndex(t : Term) = {
+        listLets(t).map(lengthFromVarBinding).max
+    }
+
+    def lengthFromVarBinding (vb : VarBinding) = {
+        getIndexFromSelect (vb.term)
+    }
+
 }

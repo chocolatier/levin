@@ -141,16 +141,6 @@ object Example {
     Tuple2(file.getName, stateTypeMap.toMap)
   }
 
-  // Assumption: Length is there within a let statement
-  // Returns the length - 1
-  def inferMaxIndex(t : Term) = {
-    listLets(t).map(lengthFromVarBinding).max
-  }
-
-  def lengthFromVarBinding (vb : VarBinding) = {
-    getIndexFromSelect (vb.term)
-  }
-
   def testGetCommonPatterns (path : String) = {
     val files  = new File(path).listFiles.filter(_.getName.endsWith(".smt2"))
 
@@ -203,36 +193,6 @@ object Example {
     }
 
     fw.close
-  }
-
-
-  def buildbvSelect (identifier : SSymbol , position: Int) = {
-    Select(QualifiedIdentifier(SimpleIdentifier(identifier)), QualifiedIdentifier(Identifier(SSymbol("bv" + position.toString),List(SNumeral(32))), None))
-
-  }
-
-  def buildAnd (t: Term) = {
-    val letFcn = createLetFcn (t)
-    val woLets = stripLets (t)
-    val app = grabFirstLet (t)
-    letFcn (buildFunctionApplication("and", Seq(ctypeSMTGen(app, "garbage"), woLets)))
-  }
-
-  def buildImplication (t : Term) = {
-    val letFcn = createLetFcn (t)
-    val woLets = stripLets (t)
-    val app = grabFirstLet (t)
-    letFcn (Implies (ctypeSMTGen(app, "garbage"), woLets))
-
-  }
-
-  def grabFirstLet (t : Term) = {
-    t match {
-      case Let (VarBinding(_,v), _, _) => {
-        v
-        }
-      case _ => t //TODO: Handle error
-    }
   }
 
 }
