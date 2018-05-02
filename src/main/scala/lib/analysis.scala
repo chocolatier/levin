@@ -149,7 +149,7 @@ package object analysis {
 
             val digitExpr = context.parseSMTLIB2String(catctx + digit_check.toString, null, null, null, null)
             dsolver.add(digitExpr)
-            val is_digit = dsolver.check() == sat 
+            val is_digit = dsolver.check() == sat
             if (is_xdigit){
                 if (!is_alpha){
                     // "digit"
@@ -163,7 +163,7 @@ package object analysis {
                     rv = (0x41, 0x46) :: (0x61, 0x66) :: (0x30, 0x39) :: Nil
                 }
             }
-        
+
         } else {
             // rv ="symbol"
             var s = context.mkSolver
@@ -185,11 +185,11 @@ package object analysis {
               }
                 rv
               } else {
-                (0x0, 0x0) :: Nil
+                rv = (0x0, 0x0) :: Nil
               }
         }
         rv
-    }   
+    }
 
     def getIndexFromSelect (t : Term) = {
 
