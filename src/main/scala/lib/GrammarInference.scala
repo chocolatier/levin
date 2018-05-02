@@ -73,6 +73,14 @@ object GrammarInference {
         val disjunctableMaps = stateConstMap.filterKeys(disjStates.contains(_)).values
         simplifiedConstList += disjunctableMaps.reduceLeft(mergeStateTypeMaps)
       }
+
+      val disjunctableStateList = disjunctableStates.flatten
+      val nonDisjStates = stateConstMap.filterKeys(!disjunctableStateList.contains(_)).values
+
+      for (v <- nonDisjStates){
+        simplifiedConstList += v
+      }
+
       simplifiedConstList
   }
 
