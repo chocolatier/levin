@@ -47,11 +47,8 @@ object GrammarInference {
   }
 
   def intTupToStr(it : Tuple2[Int,Int]) = {
-    println (it._1)
-    println (it._2)
     if (it._1 == it._2){
           if (it._1 == 0) {
-            println ("qwert")
             "'\\0'"
           } else {
             "'" ++ it._1.toChar.toString  ++ "'"
@@ -65,7 +62,7 @@ object GrammarInference {
     val files  = new File(path).listFiles.filter(_.getName.endsWith(".smt2"))
     var list = scala.collection.mutable.ListBuffer.empty[Seq[Term]]
 
-    var stateConstList = scala.collection.mutable.ListBuffer.empty[(String,Map[Int, List[Tuple2[Int, Int]]])]
+    var stateConstList = scala.collection.mutable.ListBuffer.empty[(Int,Map[Int, List[Tuple2[Int, Int]]])]
 
     for (file <- files) {
       println("processing " + file)
@@ -75,7 +72,6 @@ object GrammarInference {
   }
 
   def constructStateTypeMap (file : File) = {
-
     var ctx = scala.collection.mutable.ListBuffer.empty[Command]
     val is = new java.io.FileReader(file)
     val lexer = new smtlib.lexer.Lexer(is)
@@ -112,7 +108,12 @@ object GrammarInference {
       }
       cmd = parser.parseCommand
     }
-    Tuple2(file.getName, stateTypeMap.toMap)
+    Tuple2(constraintNameToID(file.getName), stateTypeMap.toMap)
+  }
+
+  def constraintNameToID(name : String) = {
+    // Regex stolen from https://stackoverflow.com/questions/4545937/java-splitting-the-filename-into-a-base-and-extension
+    name.split("\\.(?=[^\\.]+$)")(0).filter(_.isDigit).toInt
   }
 
 }
