@@ -8,8 +8,6 @@ import trees.Terms._
 import theories.ArraysEx._
 import theories.Ints.{IntSort, NumeralLit}
 
-import levin.Simplifications._
-
 import com.microsoft.z3._
 
 package object analysis {
@@ -40,10 +38,9 @@ package object analysis {
     def classify (ts : Seq[Term]) = {
         var m = new scala.collection.mutable.HashMap[fcnTree, Seq[Term]]
         for (t <- ts) {
-            var s = simplify (t)
-            var fT = generateFcnTree(s)
+            var fT = generateFcnTree(t)
             var olds = m.getOrElse(fT, Seq())
-            m += (fT -> (s+:olds))
+            m += (fT -> (t+:olds))
         }
         m
     }
