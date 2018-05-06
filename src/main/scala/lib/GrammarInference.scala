@@ -13,7 +13,6 @@ import theories.Ints.{IntSort, NumeralLit}
 import levin.Transformations._
 import levin.analysis._
 
-
 object GrammarInference {
   var t = new scala.collection.mutable.HashMap[List[Tuple2[Int, Int]], String]
 
@@ -28,9 +27,24 @@ object GrammarInference {
     gram
   }
 
+  def mapToSequenceT (m : Map[Int, List[Tuple2[Int, Int]]]) = {
+    val seq = m.toSeq.sortBy(_._1)
+    SequenceT(seq.map(g => getName(g._2)))
+  }
+
+  def mapToAlternativeT (m : List[Map[Int, List[Tuple2[Int, Int]]]]) = {
+    AlternativeG(m.map(mapToSequenceT).distinct)
+  }
+
+  def generateInitialGrammar (path : String) = {
+    val expr = mapToAlternativeT(buildGrammarVec(path).map(_._2).toList)
+    val tS = t.values.toSeq
+    val tM = t.map(_.swap).toMap
+    Grammar(expr, tS, tM)
+  } 
+
   def getName (f : List[Tuple2[Int, Int]]) = {
     val sorted_f = f.sorted
-
     t.get(sorted_f).getOrElse(generateNewName(sorted_f)) + " "
   }
 

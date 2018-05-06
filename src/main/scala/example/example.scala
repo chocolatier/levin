@@ -32,8 +32,9 @@ object Example {
 
     val svc = simplifyGrammarVec(bvc.toList, disj)
 
-    val m = svc
-    // val m = bvc.map(_._2)
+    // val m = svc
+    val m = bvc.map(_._2)
+
     val arrangements = m.map(mapToGrammar).distinct.mkString("\n    | ")
 
     var notEBNF = ""

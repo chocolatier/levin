@@ -1,28 +1,68 @@
-g7 = ')'
+g6 = ')'
 g1 = ' '
-g10 = '\0'
-g4 = '-'
-g8 = ' ' | '0' - '9' | 'A' - 'F' | 'a' - 'f'
-g3 = '*'
-g9 = '+' | '-'
-g5 = '+'
-g0 = '0' - '9' | 'A' - 'F' | 'a' - 'f'
-g6 = '('
-g2 = '/'
+g9 = '\0'
+g3 = '-'
+g7 = '*'
+g4 = '0' - '9'
+g0 = '+'
+g2 = '0' - '9' | 'A' - 'F' | 'a' - 'f'
+g8 = '/'
+g5 = '('
 Expr
-    = g0 g0 g0 
-    | g0 g0 g1 
-    | g0 g2 g0 
-    | g0 g3 g0 
-    | g0 g4 g0 
-    | g0 g5 g0 
-    | g0 g1 g1 
-    | g6 g0 g7 
-    | g4 g0 g0 
-    | g4 g8 g8 
-    | g4 g4 g0 
-    | g9 g9 g0 
-    | g5 g0 g0 
-    | g5 g8 g8 
-    | g5 g5 g0 
-    | g10 
+    = g0 g1 g2 
+    | g3 g3 g4 
+    | g2 g4 g4 
+    | g5 g4 g6 
+    | g3 g0 g2 
+    | g0 g0 g2 
+    | g2 g7 g2 
+    | g0 g2 g2 
+    | g3 g2 g2 
+    | g2 g2 g4 
+    | g2 g4 g2 
+    | g2 g8 g2 
+    | g3 g0 g4 
+    | g2 g3 g2 
+    | g3 g4 g4 
+    | g4 g4 g2 
+    | g4 g7 g2 
+    | g4 g2 g1 
+    | g4 g4 g1 
+    | g2 g8 g4 
+    | g4 g2 g4 
+    | g5 g2 g6 
+    | g4 g0 g4 
+    | g0 g3 g2 
+    | g0 g4 g4 
+    | g4 g2 g2 
+    | g2 g7 g4 
+    | g2 g4 g1 
+    | g0 g2 g1 
+    | g3 g1 g2 
+    | g2 g2 g2 
+    | g4 g8 g2 
+    | g0 g4 g2 
+    | g4 g3 g2 
+    | g3 g3 g2 
+    | g0 g4 g1 
+    | g9 
+    | g4 g0 g2 
+    | g0 g0 g4 
+    | g0 g3 g4 
+    | g3 g1 g4 
+    | g3 g2 g1 
+    | g2 g1 g1 
+    | g2 g0 g2 
+    | g3 g4 g1 
+    | g2 g2 g1 
+    | g0 g2 g4 
+    | g2 g0 g4 
+    | g2 g3 g4 
+    | g3 g2 g4 
+    | g3 g4 g2 
+    | g4 g7 g4 
+    | g4 g8 g4 
+    | g4 g1 g1 
+    | g4 g4 g4 
+    | g0 g1 g4 
+    | g4 g3 g4 
