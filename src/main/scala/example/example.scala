@@ -27,6 +27,8 @@ object Example {
 
     val disj = Json.parse(disjFile).as[List[List[Int]]]
 
+    val ig = generateInitialGrammar("../grammar-constraint-analysis/constraints/smt2/")
+    val cT = classifyTerms(ig)
 
     val bvc = buildGrammarVec("../grammar-constraint-analysis/constraints/smt2/")
 
@@ -44,6 +46,8 @@ object Example {
     }
 
     notEBNF += "Expr\n    = " + arrangements
+
+    println(cT)
 
     println(notEBNF)
 

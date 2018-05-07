@@ -13,9 +13,14 @@ import theories.Ints.{IntSort, NumeralLit}
 import levin.Transformations._
 import levin.analysis._
 
+import cats._
+import cats.Semigroup
+import cats.implicits._
+
 object GrammarInference {
   var t = new scala.collection.mutable.HashMap[List[Tuple2[Int, Int]], String]
 
+  // TODO: Write printer for modular funcs, remove.
   def mapToGrammar (m : Map[Int, List[Tuple2[Int, Int]]]) = {
     val seq = m.toSeq.sortBy(_._1)
 
@@ -32,16 +37,50 @@ object GrammarInference {
     SequenceT(seq.map(g => getName(g._2)))
   }
 
-  def mapToAlternativeT (m : List[Map[Int, List[Tuple2[Int, Int]]]]) = {
+  def mapToAlternativeG (m : List[Map[Int, List[Tuple2[Int, Int]]]]) = {
     AlternativeG(m.map(mapToSequenceT).distinct)
   }
 
   def generateInitialGrammar (path : String) = {
-    val expr = mapToAlternativeT(buildGrammarVec(path).map(_._2).toList)
+    val expr = mapToAlternativeG(buildGrammarVec(path).map(_._2).toList)
     val tS = t.values.toSeq
     val tM = t.map(_.swap).toMap
     Grammar(expr, tS, tM)
-  } 
+  }
+
+  // For now just working on top level AlternativeG[SequenceT]
+  def classifyTerms (g : Grammar) = {
+    println ("classifing terms")
+    var edgeMap = Map[String, Tuple2[Int, Int]]()
+    g.expr match {
+      case AlternativeG (alts) => {
+          for (alt <- alts) {
+            alt match {
+              case SequenceT (Seq(sq)) => {}
+              case SequenceT (sq) => {
+                edgeMap = edgeMap combine countEdges(sq)
+              }
+              case _ => throw new NotImplementedError()
+            }
+          }
+      }
+      case _ => throw new NotImplementedError ()
+    }
+    edgeMap
+  }
+
+  def countEdges (s : Seq[String]) = {
+    val tups = s.sliding(2).map ({ case Seq(a, b) => (a, b) })
+    var edgeMap = new scala.collection.mutable.HashMap[String, Tuple2[Int, Int]]
+    for (tup <- tups) {
+        edgeMap += (tup._1 -> ((edgeMap.get(tup._1).getOrElse((0,0))) combine (1,0)))
+        edgeMap += (tup._2 -> ((edgeMap.get(tup._2).getOrElse((0,0))) combine (0,1)))
+    }
+    edgeMap.toMap
+  }
+
+  // def updateTuple ()
+
 
   def getName (f : List[Tuple2[Int, Int]]) = {
     val sorted_f = f.sorted
