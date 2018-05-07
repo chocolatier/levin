@@ -66,7 +66,7 @@ object GrammarInference {
       }
       case _ => throw new NotImplementedError ()
     }
-    edgeMap
+    edgeMap.groupBy(_._2).mapValues(_.keys).values
   }
 
   def countEdges (s : Seq[String]) = {
@@ -79,8 +79,18 @@ object GrammarInference {
     edgeMap.toMap
   }
 
-  // def updateTuple ()
+  def disjunctTermsByPerm (g : Grammar) = {
+    val potentialDisjunctables = classifyTerms(g).filter(_.size > 1)
 
+  }
+
+  def substituteTerms (g : Gram, t0: String, t1: String) : Gram = {
+    g match {
+      case AlternativeT(grams) => AlternativeT(grams.map {case t0 => t1, case x => x})
+      case SequenceT(grams) => {}
+      case AlternativeG(grams) | SequenceG(grams) => grams.map(substituteTerms)
+    }
+  }
 
   def getName (f : List[Tuple2[Int, Int]]) = {
     val sorted_f = f.sorted
