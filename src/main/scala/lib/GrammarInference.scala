@@ -86,9 +86,10 @@ object GrammarInference {
 
   def substituteTerms (g : Gram, t0: String, t1: String) : Gram = {
     g match {
-      case AlternativeT(grams) => AlternativeT(grams.map {case t0 => t1, case x => x})
-      case SequenceT(grams) => {}
-      case AlternativeG(grams) | SequenceG(grams) => grams.map(substituteTerms)
+      case AlternativeT(grams) => AlternativeT(grams.map {case `t0` => t1; case `t1` => t0; case x => x})
+      case SequenceT(grams) => SequenceT(grams.map {case `t0` => t1; case `t1` => t0; case x => x})
+      case AlternativeG(grams) => AlternativeG (grams.map {x => substituteTerms(x, t0, t1)})
+      case SequenceG(grams) => SequenceG (grams.map {x => substituteTerms(x, t0, t1)})
     }
   }
 
