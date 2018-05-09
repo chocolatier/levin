@@ -24,16 +24,11 @@ import pprint._
 object Example {
   def main (args: Array[String]): Unit = {
 
-    val disjPath = "../grammar-constraint-analysis/state_analysis/disjunct.json"
-    val disjFile = Source.fromFile(disjPath).getLines.mkString
-
-    val disj = Json.parse(disjFile).as[List[List[Int]]]
-
     val ig = generateInitialGrammar("../grammar-constraint-analysis/constraints/smt2/")
-    // val cT = classifyTerms(ig)
+    val cT = ig.exprMap.values.map(classifyTerms)
 
     pprint.pprintln (ig, width = 50, height = 99999)
-    // pprint.pprintln (cT)
+    pprint.pprintln (cT)
 
   }
 

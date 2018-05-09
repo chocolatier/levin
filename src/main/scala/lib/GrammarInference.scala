@@ -48,30 +48,30 @@ object GrammarInference {
   }
 
   // For now just working on top level AlternativeG[SequenceT]
-  // def classifyTerms (g : Grammar) = {
-  //   println ("classifing terms")
-  //   var edgeMap = Map[String, Tuple2[Int, Int]]()
-  //   g.expr match {
-  //     case AlternativeG (alts) => {
-  //         for (alt <- alts) {
-  //           alt match {
-  //             case SequenceT (Seq(sq)) => {} // No point in checking single elem sequences
-  //             case SequenceT (sq) => {
-  //               edgeMap = edgeMap combine countEdges(sq)
-  //             }
-  //             case _ => throw new NotImplementedError()
-  //           }
-  //         }
-  //     }
-  //     case _ => throw new NotImplementedError ()
-  //   }
-  //   edgeMap.groupBy(_._2).mapValues(_.keys).values
-  // }
+  def classifyTerms (g : Gram) = {
+    println ("classifing terms")
+    var edgeMap = Map[String, Tuple2[Int, Int]]()
+    g match {
+      case AlternativeG (alts) => {
+          for (alt <- alts) {
+            alt match {
+              case SequenceG (Seq(NameG(_))) => {} // No point in checking single elem sequences
+              case SequenceG (sq) => {
+                edgeMap = edgeMap combine countEdges(sq)
+              }
+              case _ => throw new NotImplementedError()
+            }
+          }
+      }
+      case _ => throw new NotImplementedError ()
+    }
+    edgeMap.groupBy(_._2).mapValues(_.keys).values
+  }
 
 
   // s needs to have atleast 2 elements or sliding throws an error
-  def countEdges (s : Seq[String]) = {
-    val tups = s.sliding(2).map ({ case Seq(a, b) => (a, b) })
+  def countEdges (s : Seq[Gram]) = {
+    val tups = s.sliding(2).map ({ case Seq(NameG(a), NameG(b)) => (a, b) })
     var edgeMap = new scala.collection.mutable.HashMap[String, Tuple2[Int, Int]]
     for (tup <- tups) {
         edgeMap += (tup._1 -> ((edgeMap.get(tup._1).getOrElse((0,0))) combine (1,0)))
