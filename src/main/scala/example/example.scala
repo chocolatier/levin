@@ -18,6 +18,8 @@ import play.api.libs.json._
 
 import scala.io.Source
 
+import pprint._
+
 // Example usage of levin. (Actually just quick and dirty testing).
 object Example {
   def main (args: Array[String]): Unit = {
@@ -30,36 +32,8 @@ object Example {
     val ig = generateInitialGrammar("../grammar-constraint-analysis/constraints/smt2/")
     val cT = classifyTerms(ig)
 
-    val bvc = buildGrammarVec("../grammar-constraint-analysis/constraints/smt2/")
-
-    val svc = simplifyGrammarVec(bvc.toList, disj)
-
-    // val m = svc
-    val m = bvc.map(_._2)
-
-    val arrangements = m.map(mapToGrammar).distinct.mkString("\n    | ")
-
-    var notEBNF = ""
-
-    for ((k,v) <- t){
-      notEBNF += v + " = " + listToASCII(k) + "\n"
-    }
-
-    notEBNF += "Expr\n    = " + arrangements
-
-    println(cT)
-
-    println(notEBNF)
-
-    val x = Json.toJson(bvc)
-
-    val fw = new java.io.FileWriter("constraintMapping.json")
-    fw.write(x.toString)
-    fw.close
-
-    val fw2 = new java.io.FileWriter("grammar.notebnf")
-    fw2.write(notEBNF)
-    fw2.close
+    pprint.pprintln (ig, width = 50, height = 99999)
+    pprint.pprintln (cT)
 
   }
 

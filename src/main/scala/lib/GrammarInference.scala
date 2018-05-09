@@ -56,7 +56,7 @@ object GrammarInference {
       case AlternativeG (alts) => {
           for (alt <- alts) {
             alt match {
-              case SequenceT (Seq(sq)) => {}
+              case SequenceT (Seq(sq)) => {} // No point in checking single elem sequences
               case SequenceT (sq) => {
                 edgeMap = edgeMap combine countEdges(sq)
               }
@@ -69,6 +69,8 @@ object GrammarInference {
     edgeMap.groupBy(_._2).mapValues(_.keys).values
   }
 
+
+  // s needs to have atleast 2 elements or sliding throws an error
   def countEdges (s : Seq[String]) = {
     val tups = s.sliding(2).map ({ case Seq(a, b) => (a, b) })
     var edgeMap = new scala.collection.mutable.HashMap[String, Tuple2[Int, Int]]
@@ -81,6 +83,11 @@ object GrammarInference {
 
   def disjunctTermsByPerm (g : Grammar) = {
     val potentialDisjunctables = classifyTerms(g).filter(_.size > 1)
+    potentialDisjunctables.map(sieveTerms(g, _))
+
+  }
+
+  def sieveTerms(g : Grammar, terms: Iterable[String]) {
 
   }
 
