@@ -32,42 +32,41 @@ object GrammarInference {
     gram
   }
 
-  def mapToSequenceT (m : Map[Int, List[Tuple2[Int, Int]]]) = {
+  def mapToSequenceG (m : Map[Int, List[Tuple2[Int, Int]]]) = {
     val seq = m.toSeq.sortBy(_._1)
-    SequenceT(seq.map(g => getName(g._2)))
+    SequenceG(seq.map(g => NameG(getName(g._2))))
   }
 
   def mapToAlternativeG (m : List[Map[Int, List[Tuple2[Int, Int]]]]) = {
-    AlternativeG(m.map(mapToSequenceT).distinct)
+    AlternativeG(m.map(mapToSequenceG).distinct)
   }
 
   def generateInitialGrammar (path : String) = {
     val expr = mapToAlternativeG(buildGrammarVec(path).map(_._2).toList)
-    val tS = t.values.toSeq
     val tM = t.map(_.swap).toMap
-    Grammar(expr, tS, tM)
+    Grammar(Map("Expr" -> expr), tM)
   }
 
   // For now just working on top level AlternativeG[SequenceT]
-  def classifyTerms (g : Grammar) = {
-    println ("classifing terms")
-    var edgeMap = Map[String, Tuple2[Int, Int]]()
-    g.expr match {
-      case AlternativeG (alts) => {
-          for (alt <- alts) {
-            alt match {
-              case SequenceT (Seq(sq)) => {} // No point in checking single elem sequences
-              case SequenceT (sq) => {
-                edgeMap = edgeMap combine countEdges(sq)
-              }
-              case _ => throw new NotImplementedError()
-            }
-          }
-      }
-      case _ => throw new NotImplementedError ()
-    }
-    edgeMap.groupBy(_._2).mapValues(_.keys).values
-  }
+  // def classifyTerms (g : Grammar) = {
+  //   println ("classifing terms")
+  //   var edgeMap = Map[String, Tuple2[Int, Int]]()
+  //   g.expr match {
+  //     case AlternativeG (alts) => {
+  //         for (alt <- alts) {
+  //           alt match {
+  //             case SequenceT (Seq(sq)) => {} // No point in checking single elem sequences
+  //             case SequenceT (sq) => {
+  //               edgeMap = edgeMap combine countEdges(sq)
+  //             }
+  //             case _ => throw new NotImplementedError()
+  //           }
+  //         }
+  //     }
+  //     case _ => throw new NotImplementedError ()
+  //   }
+  //   edgeMap.groupBy(_._2).mapValues(_.keys).values
+  // }
 
 
   // s needs to have atleast 2 elements or sliding throws an error
@@ -97,10 +96,12 @@ object GrammarInference {
 
   def substituteTerms (g : Gram, t0: String, t1: String) : Gram = {
     g match {
-      case AlternativeT(grams) => AlternativeT(grams.map {case `t0` => t1; case `t1` => t0; case x => x})
-      case SequenceT(grams) => SequenceT(grams.map {case `t0` => t1; case `t1` => t0; case x => x})
+      case NameG(name) => NameG (name match {case `t0` => t1; case `t1` => t0; case x => x})
       case AlternativeG(grams) => AlternativeG (grams.map {x => substituteTerms(x, t0, t1)})
       case SequenceG(grams) => SequenceG (grams.map {x => substituteTerms(x, t0, t1)})
+      case LoopG (gram) => LoopG (substituteTerms(gram, t0, t1))
+      case OptionalG (gram) => OptionalG (substituteTerms(gram, t0, t1))
+
     }
   }
 

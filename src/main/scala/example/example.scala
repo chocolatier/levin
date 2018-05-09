@@ -30,10 +30,10 @@ object Example {
     val disj = Json.parse(disjFile).as[List[List[Int]]]
 
     val ig = generateInitialGrammar("../grammar-constraint-analysis/constraints/smt2/")
-    val cT = classifyTerms(ig)
+    // val cT = classifyTerms(ig)
 
     pprint.pprintln (ig, width = 50, height = 99999)
-    pprint.pprintln (cT)
+    // pprint.pprintln (cT)
 
   }
 
