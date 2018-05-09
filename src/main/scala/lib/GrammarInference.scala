@@ -81,15 +81,19 @@ object GrammarInference {
     edgeMap.toMap
   }
 
-  def disjunctTermsByPerm (g : Grammar) = {
-    val potentialDisjunctables = classifyTerms(g).filter(_.size > 1)
-    potentialDisjunctables.map(sieveTerms(g, _))
+  // def disjunctTermsByPerm (g : Grammar) = {
+  //   val potentialDisjunctables = classifyTerms(g).filter(_.size > 1)
+  //   potentialDisjunctables.map(sieveTerms(g, _))
+  //
+  // }
 
-  }
-
-  def sieveTerms(g : Grammar, terms: Iterable[String]) {
-
-  }
+  // def sieveTerms(g : Grammar, terms: Iterable[String]) = {
+  //   var terms2 = terms
+  //   for (t0 <- terms2) {
+  //       val equals = t0::terms2.tail.map(substituteTerms(g, t0,_)).filter(isEqualGramamr)
+  //       terms2 = terms2 \\ equals
+  //   }
+  // }
 
   def substituteTerms (g : Gram, t0: String, t1: String) : Gram = {
     g match {
