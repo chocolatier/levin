@@ -16,6 +16,16 @@ object GrammarMutator {
     addNewExpr(g, alternatedExpr)
   }
 
+  def makeOptional (g : Grammar, s1 : Gram) : Grammar = {
+    val optionalExpr = OptionalG (s1)
+    addNewExpr(g, optionalExpr)
+  }
+
+  def makeLoop (g : Grammar, s1 : Gram) : Grammar = {
+    val loopedExpr = LoopG (s1)
+    addNewExpr(g, loopedExpr)
+  }
+
   def addNewExpr(g: Grammar, gm : Gram) = {
     val exprName = generateExprName(g)
     Grammar (g.exprMap + (exprName -> gm), g.terminalMap)
