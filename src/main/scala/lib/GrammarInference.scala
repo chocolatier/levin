@@ -65,7 +65,7 @@ object GrammarInference {
       }
       case _ => throw new NotImplementedError ()
     }
-    edgeMap.groupBy(_._2).mapValues(_.keys).values
+    edgeMap.groupBy(_._2).mapValues(_.keys.toSeq).values.toSeq // TODO: Break this down into multiple steps
   }
 
 
@@ -80,19 +80,26 @@ object GrammarInference {
     edgeMap.toMap
   }
 
-  // def disjunctTermsByPerm (g : Grammar) = {
-  //   val potentialDisjunctables = classifyTerms(g).filter(_.size > 1)
-  //   potentialDisjunctables.map(sieveTerms(g, _))
-  //
-  // }
+  def disjunctTermsByPerm (g : Grammar) = {
+    // val potentialDisjunctables = classifyTerms(g.exprMap.values.iterator.next()).filter(_.size > 1) // Definitely should not be restricted to just the first
+    val potentialDisjunctables = g.exprMap.values.map(classifyTerms)
+    potentialDisjunctables.map(_.map(sieveTerms(g, _)))
+  }
 
-  // def sieveTerms(g : Grammar, terms: Iterable[String]) = {
-  //   var terms2 = terms
-  //   for (t0 <- terms2) {
-  //       val equals = t0::terms2.tail.map(substituteTerms(g, t0,_)).filter(isEqualGramamr)
-  //       terms2 = terms2 \\ equals
-  //   }
-  // }
+  def sieveTerms(g : Grammar, terms: Seq[String]) : Seq[Seq[String]] = {
+    terms match {
+      case Nil => Nil
+      case xs => {
+        val lTs = findLikeTerminals(g, xs.head, xs.tail)
+        val remaining = xs.tail filterNot lTs.contains
+        Seq(lTs) ++ sieveTerms(g, remaining)
+      }
+    }
+  }
+
+  def findLikeTerminals(g: Grammar, t0: String, t1: Seq[String]) : Seq[String] = {
+    Seq("te","st")
+  }
 
   def substituteTerms (g : Gram, t0: String, t1: String) : Gram = {
     g match {
