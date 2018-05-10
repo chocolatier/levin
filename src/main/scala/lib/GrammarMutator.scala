@@ -6,12 +6,12 @@ object GrammarMutator {
 
   }
 
-  def chainExprs(g: Grammar, s1 : Gram, s2: Gram) : Grammar  = {
+  def makeSequence (g: Grammar, s1 : Gram, s2: Gram) : Grammar  = {
     val chainedExpr = SequenceG (Seq(s1, s2))
     addNewExpr(g, chainedExpr)
   }
 
-  def generateAlternate(g: Grammar, s1: Gram, s2: Gram) : Grammar = {
+  def makeAlternative (g: Grammar, s1: Gram, s2: Gram) : Grammar = {
     val alternatedExpr = AlternativeG (Set(s1, s2))
     addNewExpr(g, alternatedExpr)
   }
