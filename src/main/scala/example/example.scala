@@ -13,6 +13,7 @@ import theories.Ints.{IntSort, NumeralLit}
 import levin.Transformations._
 import levin.analysis._
 import levin.GrammarInference._
+import levin.TestCaseGenerator._
 
 import play.api.libs.json._
 
@@ -29,6 +30,12 @@ object Example {
 
     pprint.pprintln (ig, width = 50, height = 99999)
     pprint.pprintln (cT)
+
+    for {
+      i <- 0 to 20
+    } {
+    println(generateCase(ig))
+  }
 
   }
 

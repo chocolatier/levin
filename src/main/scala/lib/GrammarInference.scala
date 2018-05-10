@@ -107,7 +107,7 @@ object GrammarInference {
 
   def getName (f : List[Tuple2[Int, Int]]) = {
     val sorted_f = f.sorted
-    t.get(sorted_f).getOrElse(generateNewName(sorted_f)) + " "
+    t.get(sorted_f).getOrElse(generateNewName(sorted_f))
   }
 
   def generateNewName(f: List[Tuple2[Int, Int]]) = {
