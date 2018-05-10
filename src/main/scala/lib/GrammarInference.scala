@@ -38,7 +38,7 @@ object GrammarInference {
   }
 
   def mapToAlternativeG (m : List[Map[Int, List[Tuple2[Int, Int]]]]) = {
-    AlternativeG(m.map(mapToSequenceG).distinct)
+    AlternativeG(m.map(mapToSequenceG).toSet)
   }
 
   def generateInitialGrammar (path : String) = {

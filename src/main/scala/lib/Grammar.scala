@@ -3,10 +3,9 @@ package levin
 sealed trait Gram
 
 // Apparently the way to define an ADT...............................
-// TODO: Incorporate optional components of grammar.
 // I will be accessing the terminals often enough that it makes
 // more sense to put it in a map
-case class AlternativeG (alternatives: Seq[Gram]) extends Gram
+case class AlternativeG (alternatives: Set[Gram]) extends Gram
 case class SequenceG (sequence: Seq[Gram]) extends Gram
 case class OptionalG (option: Gram) extends Gram
 case class LoopG (expr: Gram) extends Gram
