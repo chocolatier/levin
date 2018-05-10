@@ -18,7 +18,8 @@ object GrammarMutator {
       mutateable match {
         case SequenceG(x) => {
           println ("found sequence")
-          sequenceMutator (g, SequenceG(x))
+          pprint.pprintln(sequenceMutator (g, SequenceG(x)), height = 9999)
+
         }
         case _ =>
     }
@@ -34,13 +35,12 @@ object GrammarMutator {
     }
   }
 
-  def sequenceMutator (g: Grammar, seq : SequenceG) : Gram = {
+  def sequenceMutator (g: Grammar, seq : SequenceG) : Grammar = {
     println ("mutating sequence")
     checkPotentialLoops (g, seq)
-    seq
   }
 
-  def checkPotentialLoops (g: Grammar, seq : SequenceG) : Gram = {
+  def checkPotentialLoops (g: Grammar, seq : SequenceG) : Grammar = {
     println("checking for loops")
     var targetGrammar = g
     val repeats = detectRepeats(seq)
@@ -56,14 +56,16 @@ object GrammarMutator {
 
       val name = generateExprName(g)
       val next_grammar = Grammar (g.exprMap + (name -> updatedGram), g.terminalMap)
-      testGrammar(next_grammar, name)
+      if (testGrammar(next_grammar, name)) {
+        targetGrammar = next_grammar
+      }
     }
 
-    seq
+    targetGrammar
   }
 
-  def testGrammar (g: Grammar, start: String = "Expr") = {
-    val targetProgram = ("")
+  def testGrammar (g: Grammar, start: String = "Expr") : Boolean = {
+    val targetProgram = (" ")
 
     for (i <- 0 to 20) {
       val testCase = generateCase(g, start)
@@ -73,7 +75,12 @@ object GrammarMutator {
       testCaseFW.close
       val s = targetProgram + " testFile" !;
       println(s)
+
+      if (s != 0) {
+        return false
+      }
     }
+    return true
   }
 
   def detectRepeats (seq : SequenceG) : Seq [Gram] = {
