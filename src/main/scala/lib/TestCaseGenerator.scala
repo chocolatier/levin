@@ -22,7 +22,7 @@ object TestCaseGenerator {
         }
       }
       case LoopG (loopExpr) => {
-        val length = rnd.nextInt
+        val length = rnd.nextInt(10)
         var rv = ""
 
         for (i <- 0 to length){

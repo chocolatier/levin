@@ -1,9 +1,87 @@
 package levin
 
+import levin.TestCaseGenerator._
+
+import sys.process._
+import scala.language.postfixOps
+
+import scala.util.Random
+
 object GrammarMutator {
   def mutateGrammar (g: Grammar, start : String = "Expr") = {
     val startGram = g.exprMap(start)
+    for (i <- 0 to 100){
+      val mutateable = pickGramElement (startGram)
 
+      println("mutating")
+
+      mutateable match {
+        case SequenceG(x) => {
+          println ("found sequence")
+          sequenceMutator (g, SequenceG(x))
+        }
+        case _ =>
+    }
+  }
+
+  }
+
+  def pickGramElement (gm : Gram) : Gram = {
+    val rnd = new Random
+    gm match {
+      case AlternativeG (alt) => alt.toVector(rnd.nextInt(alt.size))
+      case x => x
+    }
+  }
+
+  def sequenceMutator (g: Grammar, seq : SequenceG) : Gram = {
+    println ("mutating sequence")
+    checkPotentialLoops (g, seq)
+    seq
+  }
+
+  def checkPotentialLoops (g: Grammar, seq : SequenceG) : Gram = {
+    println("checking for loops")
+    var targetGrammar = g
+    val repeats = detectRepeats(seq)
+    println(repeats)
+    for (repeat <- repeats) {
+      val mid = Seq(LoopG (repeat))
+      val iS = seq.sequence.indexOfSlice(Seq(repeat, repeat))
+      val left = seq.sequence.take(iS)
+      val right = seq.sequence.drop(iS).dropWhile(_==repeat)
+      val updatedGram = SequenceG (left ++ mid ++ right)
+
+      println (updatedGram)
+
+      val name = generateExprName(g)
+      val next_grammar = Grammar (g.exprMap + (name -> updatedGram), g.terminalMap)
+      testGrammar(next_grammar, name)
+    }
+
+    seq
+  }
+
+  def testGrammar (g: Grammar, start: String = "Expr") = {
+    val targetProgram = ("")
+
+    for (i <- 0 to 20) {
+      val testCase = generateCase(g, start)
+      val testCaseFW = new java.io.FileWriter("testFile")
+      println (testCase)
+      testCaseFW.write(testCase)
+      testCaseFW.close
+      val s = targetProgram + " testFile" !;
+      println(s)
+    }
+  }
+
+  def detectRepeats (seq : SequenceG) : Seq [Gram] = {
+    if (seq.sequence.length <= 1) {
+      Seq ()
+    } else {
+      seq.sequence.sliding(2).filter {case Seq(a, b) => a == b}.map {case Seq(a, b) => a} .toSeq
+    }
   }
 
   def makeSequence (g: Grammar, s1 : Gram, s2: Gram) : Grammar  = {
@@ -34,7 +112,7 @@ object GrammarMutator {
   def generateExprName (g: Grammar) : String = {
     val taken = g.exprMap.keys.toList.sorted
 
-    if (taken.isEmpty) {
+    if (taken.isEmpty || taken.last.filter(_.isDigit) == "") {
       "e0"
     } else {
       val n = taken.last.filter(_.isDigit).toInt
