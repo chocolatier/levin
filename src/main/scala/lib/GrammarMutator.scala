@@ -8,8 +8,17 @@ object GrammarMutator {
 
   def chainExprs(g: Grammar, s1 : Gram, s2: Gram) : Grammar  = {
     val chainedExpr = SequenceG (Seq(s1, s2))
+    addNewExpr(g, chainedExpr)
+  }
+
+  def generateAlternate(g: Grammar, s1: Gram, s2: Gram) : Grammar = {
+    val alternatedExpr = AlternativeG (Set(s1, s2))
+    addNewExpr(g, alternatedExpr)
+  }
+
+  def addNewExpr(g: Grammar, gm : Gram) = {
     val exprName = generateExprName(g)
-    Grammar (g.exprMap + (exprName -> chainedExpr), g.terminalMap)
+    Grammar (g.exprMap + (exprName -> gm), g.terminalMap)
   }
 
   def generateExprName (g: Grammar) : String = {
