@@ -6,7 +6,7 @@ case class LevinConfig(
   testFile: String = "testFile"
 )
 
-package object levin  {
+package object levinConf  {
   var SMT2ConstraintDir = ""
   var BinaryLocation = ""
   var TestFile = ""
