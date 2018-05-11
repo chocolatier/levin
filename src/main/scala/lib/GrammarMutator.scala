@@ -10,6 +10,7 @@ import scala.util.Random
 object GrammarMutator {
   def mutateGrammar (g: Grammar, start : String = "Expr") = {
     val startGram = g.exprMap(start)
+    var next_grammar = g
     for (i <- 0 to 100){
       val mutateable = pickGramElement (startGram)
 
@@ -18,8 +19,8 @@ object GrammarMutator {
       mutateable match {
         case SequenceG(x) => {
           println ("found sequence")
-          pprint.pprintln(sequenceMutator (g, SequenceG(x)), height = 9999)
-
+          next_grammar = sequenceMutator (next_grammar, SequenceG(x))
+          pprint.pprintln (next_grammar, height = 9999)
         }
         case _ =>
     }
