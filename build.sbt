@@ -11,6 +11,8 @@ libraryDependencies += "com.lihaoyi" %% "pprint" % "0.5.3"
 resolvers += "Typesafe Repo" at "http://repo.typesafe.com/typesafe/releases/"
 libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.7"
 
+libraryDependencies += "com.github.pureconfig" %% "pureconfig" % "0.9.1"
+
 lazy val root = (project in file(".")).
   settings(
     inThisBuild(List(
