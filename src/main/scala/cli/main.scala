@@ -1,6 +1,7 @@
 package levin
 
 import levin.GrammarInference._
+import levin.GrammarMutator._
 
 object cli {
   def main(args: Array[String]) : Unit = {
@@ -17,8 +18,15 @@ object cli {
       case Left(_) => throw new Exception("Malformed Configuration File")
     }
 
+
+    // Testing Garbage
     val ig = generateInitialGrammar()
     val cT = ig.exprMap.values.map(classifyTerms)
+
+    pprint.pprintln (ig, width = 50, height = 99999)
+    pprint.pprintln (cT)
+
+    mutateGrammar(ig)
 
   }
 }

@@ -65,15 +65,18 @@ object GrammarMutator {
   }
 
   def testGrammar (g: Grammar, start: String = "Expr") : Boolean = {
-    val targetProgram = (" ")
+    val targetProgram = levinConf.BinaryLocation
 
     for (i <- 0 to 20) {
       val testCase = generateCase(g, start)
-      val testCaseFW = new java.io.FileWriter("testFile")
+      val testCaseFW = new java.io.FileWriter(levinConf.TestFile)
       println (testCase)
       testCaseFW.write(testCase)
       testCaseFW.close
-      val s = targetProgram + " testFile" !;
+
+      // Do NOT remove semi-colon. `!` is a postfix operator,
+      // and the `;` prevents it from being misread as infix
+      val s = targetProgram + " " + levinConf.TestFile !;
       println(s)
 
       if (s != 0) {
