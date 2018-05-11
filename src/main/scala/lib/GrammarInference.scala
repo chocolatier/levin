@@ -131,22 +131,6 @@ object GrammarInference {
     }
   }
 
-  def listToASCII (l : List[Tuple2[Int, Int]]) = {
-    l.map(intTupToStr).mkString(" | ")
-  }
-
-  def intTupToStr(it : Tuple2[Int,Int]) = {
-    if (it._1 == it._2){
-          if (it._1 == 0) {
-            "'\\0'"
-          } else {
-            "'" ++ it._1.toChar.toString  ++ "'"
-          }
-    } else {
-        "'" ++ ((it._1).toChar).toString ++ "' - '" ++ ((it._2).toChar).toString ++ "'"
-    }
-  }
-
   def simplifyGrammarVec (stateConstList : List[(Int,Map[Int, List[Tuple2[Int, Int]]])], disjunctableStates : List[List[Int]] ) = {
       val stateConstMap = stateConstList.toMap
 

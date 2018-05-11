@@ -20,15 +20,19 @@ import scala.io.Source
 
 import pprint._
 
+import cats._
+
 // Example usage of levin. (Actually just quick and dirty testing).
 object Example {
   def main (args: Array[String]): Unit = {
 
     val ig = generateInitialGrammar("../grammar-constraint-analysis/constraints/smt2/")
-    val cT = ig.exprMap.values.map(classifyTerms)
+    // val cT = ig.exprMap.values.map(classifyTerms)
 
     pprint.pprintln (ig, width = 50, height = 99999)
-    pprint.pprintln (cT)
+    // pprint.pprintln (cT)
+
+    println(ig.show(ig))
 
   }
 
