@@ -4,3 +4,4 @@ target
 .vscode/launch.json
 lib/com.microsoft.z3.jar
 lib/*
+src/main/resources/application.conf
