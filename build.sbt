@@ -8,6 +8,9 @@ libraryDependencies += "org.typelevel" %% "cats-core" % "1.0.1"
 
 libraryDependencies += "com.lihaoyi" %% "pprint" % "0.5.3"
 
+libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3"
+libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging" % "3.9.0"
+
 resolvers += "Typesafe Repo" at "http://repo.typesafe.com/typesafe/releases/"
 libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.7"
 
