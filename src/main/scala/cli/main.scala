@@ -23,8 +23,7 @@ object cli {
     val ig = generateInitialGrammar()
     val cT = ig.exprMap.values.map(classifyTerms)
 
-    pprint.pprintln (ig, width = 50, height = 99999)
-    pprint.pprintln (cT)
+    ig.show(ig)
 
     mutateGrammar(ig)
 

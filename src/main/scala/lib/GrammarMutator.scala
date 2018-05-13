@@ -20,7 +20,7 @@ object GrammarMutator {
         case SequenceG(x) => {
           println ("found sequence")
           next_grammar = sequenceMutator (next_grammar, SequenceG(x))
-          pprint.pprintln (next_grammar, height = 9999)
+          println (next_grammar.show(next_grammar))
         }
         case _ =>
     }
@@ -53,7 +53,7 @@ object GrammarMutator {
       val right = seq.sequence.drop(iS).dropWhile(_==repeat)
       val updatedGram = SequenceG (left ++ mid ++ right)
 
-      println (updatedGram)
+      println (updatedGram.show(updatedGram))
 
       val name = generateExprName(g)
       val next_grammar = Grammar (g.exprMap + (name -> updatedGram), g.terminalMap)
