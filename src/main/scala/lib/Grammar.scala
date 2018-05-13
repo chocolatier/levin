@@ -27,7 +27,6 @@ case class OptionalG (option: Gram) extends Gram
 case class LoopG (expr: Gram) extends Gram
 case class NameG (name: String) extends Gram
 
-
 case class Grammar(exprMap: Map[String, Gram], terminalMap: Map[String, List[Tuple2[Int, Int]]])  extends Show[Grammar] {
     def show(g: Grammar) : String = {
         g.exprMap.map({case (k,v) => k + " = \n  " + v.show(v)}).mkString("\n") + "\n\n" +
