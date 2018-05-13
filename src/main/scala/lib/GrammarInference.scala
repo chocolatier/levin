@@ -12,6 +12,7 @@ import theories.Ints.{IntSort, NumeralLit}
 
 import levin.Transformations._
 import levin.analysis._
+import levin.GrammarMutator._
 
 import cats._
 import cats.Semigroup
@@ -83,7 +84,13 @@ object GrammarInference {
   def disjunctTermsByPerm (g : Grammar) = {
     // Maybe combine the different expressions?
     val potentialDisjunctables = g.exprMap.values.map(classifyTerms)
-    potentialDisjunctables.map(_.flatMap(sieveTerms(g, _)))
+    val checked = potentialDisjunctables.map(_.flatMap(sieveTerms(g, _)))
+  }
+
+  def combineLikeTerminals (g: Grammar, lTs: Seq[String]) = {
+    val namedSeq = lTs.map(NameG(_))
+    val newName = generateExprName(g)
+
   }
 
   def sieveTerms(g : Grammar, terms: Seq[String]) : Seq[Seq[String]] = {
@@ -112,17 +119,21 @@ object GrammarInference {
   }
 
   def grammarSubstitution (g : Grammar, t0: String, t1: String) = {
-    val substG = g.exprMap.foldLeft(g.exprMap) {case (a,(k,v)) => a + {k -> substituteTerms(v, t0, t1)} }
+    val substG = g.exprMap.foldLeft(g.exprMap) {case (a,(k,v)) => a + {k -> substituteTerms(v, stringReplace(t0, t1, _))} }
     Grammar(substG, g.terminalMap)
   }
 
-  def substituteTerms (g : Gram, t0: String, t1: String) : Gram = {
+  def stringReplace (t0: String, t1: String, in : String) = {
+    in match {case `t0` => t1; case `t1` => t0; case x => x}
+  }
+
+  def substituteTerms (g : Gram, f : (String => String)) : Gram = {
     g match {
-      case NameG(name) => NameG (name match {case `t0` => t1; case `t1` => t0; case x => x})
-      case AlternativeG(grams) => AlternativeG (grams.map {x => substituteTerms(x, t0, t1)})
-      case SequenceG(grams) => SequenceG (grams.map {x => substituteTerms(x, t0, t1)})
-      case LoopG (gram) => LoopG (substituteTerms(gram, t0, t1))
-      case OptionalG (gram) => OptionalG (substituteTerms(gram, t0, t1))
+      case NameG(name) => NameG (f(name))
+      case AlternativeG(grams) => AlternativeG (grams.map {x => substituteTerms(x, f)})
+      case SequenceG(grams) => SequenceG (grams.map {x => substituteTerms(x, f)})
+      case LoopG (gram) => LoopG (substituteTerms(gram, f))
+      case OptionalG (gram) => OptionalG (substituteTerms(gram, f))
 
     }
   }
