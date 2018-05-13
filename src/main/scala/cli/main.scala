@@ -23,9 +23,7 @@ object cli {
     val ig = generateInitialGrammar()
     val cT = ig.exprMap.values.map(classifyTerms)
 
-    ig.show(ig)
-
-    mutateGrammar(ig)
+    println(disjunctTermsByPerm(ig))
 
   }
 }

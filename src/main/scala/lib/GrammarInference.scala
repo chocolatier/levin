@@ -65,7 +65,7 @@ object GrammarInference {
       }
       case _ => throw new NotImplementedError ()
     }
-    edgeMap.groupBy(_._2).mapValues(_.keys.toSeq).values.toSeq // TODO: Break this down into multiple steps
+    edgeMap.groupBy(_._2).mapValues(_.keys.toSeq).values // TODO: Break this down into multiple steps
   }
 
 
@@ -81,16 +81,16 @@ object GrammarInference {
   }
 
   def disjunctTermsByPerm (g : Grammar) = {
-    // val potentialDisjunctables = classifyTerms(g.exprMap.values.iterator.next()).filter(_.size > 1) // Definitely should not be restricted to just the first
+    // Maybe combine the different expressions?
     val potentialDisjunctables = g.exprMap.values.map(classifyTerms)
-    potentialDisjunctables.map(_.map(sieveTerms(g, _)))
+    potentialDisjunctables.map(_.flatMap(sieveTerms(g, _)))
   }
 
   def sieveTerms(g : Grammar, terms: Seq[String]) : Seq[Seq[String]] = {
     terms match {
       case Nil => Nil
       case xs => {
-        val lTs = findLikeTerminals(g, xs.head, xs.tail)
+        val lTs = Seq(xs.head) ++ findLikeTerminals(g, xs.head, xs.tail)
         val remaining = xs.tail filterNot lTs.contains
         Seq(lTs) ++ sieveTerms(g, remaining)
       }
@@ -98,7 +98,22 @@ object GrammarInference {
   }
 
   def findLikeTerminals(g: Grammar, t0: String, t1: Seq[String]) : Seq[String] = {
-    Seq("te","st")
+    t1 match {
+      case Nil => Nil
+      case ts => {
+        val newGm = grammarSubstitution (g, t0, ts.head)
+        if (newGm == g) {
+          Seq(ts.head) ++ findLikeTerminals(g, t0, ts.tail)
+        } else {
+          findLikeTerminals(g, t0, ts.tail)
+        }
+      }
+    }
+  }
+
+  def grammarSubstitution (g : Grammar, t0: String, t1: String) = {
+    val substG = g.exprMap.foldLeft(g.exprMap) {case (a,(k,v)) => a + {k -> substituteTerms(v, t0, t1)} }
+    Grammar(substG, g.terminalMap)
   }
 
   def substituteTerms (g : Gram, t0: String, t1: String) : Gram = {
@@ -119,7 +134,6 @@ object GrammarInference {
 
   def generateNewName(f: List[Tuple2[Int, Int]]) = {
     val taken = t.values.toList.sorted
-    // println(taken)
     if (taken.isEmpty){
       t += (f -> "g0")
       "g0"
