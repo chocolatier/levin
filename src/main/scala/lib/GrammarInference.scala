@@ -85,12 +85,26 @@ object GrammarInference {
     // Maybe combine the different expressions?
     val potentialDisjunctables = g.exprMap.values.map(classifyTerms)
     val checked = potentialDisjunctables.map(_.flatMap(sieveTerms(g, _)))
+    checked.map(_.foldLeft(g)({case (a, v) => combineLikeTerminals(a, v)}))
   }
 
   def combineLikeTerminals (g: Grammar, lTs: Seq[String]) = {
-    val namedSeq = lTs.map(NameG(_))
-    val newName = generateExprName(g)
+    if (lTs.length > 1){
+      val namedSeq = AlternativeG (lTs.map(NameG(_)).toSet)
+      val newName = generateExprName(g)
+      val subst = g.exprMap.foldLeft(g.exprMap) {case (a, (k,v)) => a  + (k -> substituteTerms(v, seqStrReplace(newName, lTs, _)))}
+      Grammar (subst + (newName -> namedSeq), g.terminalMap)
+    } else {
+      g
+    }
+  }
 
+  def seqStrReplace (newName : String, targets : Seq[String], in : String) = {
+    if (targets contains in){
+      newName
+    } else {
+      in
+    }
   }
 
   def sieveTerms(g : Grammar, terms: Seq[String]) : Seq[Seq[String]] = {

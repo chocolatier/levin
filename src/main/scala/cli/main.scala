@@ -22,8 +22,8 @@ object cli {
     // Testing Garbage
     val ig = generateInitialGrammar()
     val cT = ig.exprMap.values.map(classifyTerms)
-
-    println(disjunctTermsByPerm(ig))
+    val disj = disjunctTermsByPerm(ig)
+    println(disj.toSeq(0).show(disj.toSeq(0)))
 
   }
 }
