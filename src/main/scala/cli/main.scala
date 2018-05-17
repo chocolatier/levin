@@ -2,6 +2,7 @@ package levin
 
 import levin.GrammarInference._
 import levin.GrammarMutator._
+import levin.S2EInputGenerator._
 
 object cli {
   def main(args: Array[String]) : Unit = {
@@ -23,7 +24,10 @@ object cli {
     val ig = generateInitialGrammar()
     val cT = ig.exprMap.values.map(classifyTerms)
     val disj = disjunctTermsByPerm(ig)
-    println(disj.toSeq(0).show(disj.toSeq(0)))
+    println (ig.show(ig))
+    println (disj.toSeq(0).show(disj.toSeq(0)))
+
+    generateInputsForGrammar(disj.toSeq(0), "Expr")
 
   }
 }
