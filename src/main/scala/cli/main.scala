@@ -3,6 +3,7 @@ package levin
 import levin.GrammarInference._
 import levin.GrammarMutator._
 import levin.S2EInputGenerator._
+import levin.S2EConfig._
 
 object cli {
   def main(args: Array[String]) : Unit = {
@@ -18,6 +19,15 @@ object cli {
       }
       case Left(_) => throw new Exception("Malformed Configuration File")
     }
+
+
+    val v = parseYAMLConfig("./src/main/resources/config.yml")
+    val cfg = (generateConfigFile(v))
+
+    val fw = new java.io.FileWriter("s2e-config.lua")
+    println (cfg)
+    fw.write(cfg)
+    fw.close
 
 
     // Testing Garbage

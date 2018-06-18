@@ -16,7 +16,7 @@ resolvers += Resolver.sonatypeRepo("snapshots")
 
 libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.7"
 
-libraryDependencies += "io.circe" %% "circe-yaml" % "0.6.1"
+libraryDependencies += "io.circe" %% "circe-yaml" % "0.8.0"
 libraryDependencies += "io.circe" %% "circe-generic" % "0.8.0"
 
 libraryDependencies += "com.github.pureconfig" %% "pureconfig" % "0.9.1"

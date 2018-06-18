@@ -5,3 +5,4 @@ target
 lib/com.microsoft.z3.jar
 lib/*
 src/main/resources/application.conf
+src/main/resources/config.yml

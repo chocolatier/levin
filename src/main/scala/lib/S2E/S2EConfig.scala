@@ -10,17 +10,17 @@ import io.circe._
 
 object S2EConfig {
   case class LoggingOptions(console : String, logLevel : String)
-  case class S2EOptions(logging : LoggingOptions, kleeArgs : List[String])
+  case class S2EOptions(logging : LoggingOptions , kleeArgs : List[String])
 
-  sealed trait ConfigObject
-  case class ConfigString (s : String) extends ConfigObject
-  case class PluginConfig (name : String, value : ConfigObject) extends ConfigObject
+  // sealed trait ConfigObject
+  // case class ConfigString (s : String) extends ConfigObject
+  case class PluginConfig (name : String, value : String) // extends ConfigObject
   case class PluginOptions (name : String, config : List[PluginConfig])
 
   case class S2EConfig(s2e : S2EOptions, plugins : List[PluginOptions])
 
   def parseYAMLConfig(path : String) = {
-      val config = Source.fromFile(path).getLines.mkString
+      val config = Source.fromFile(path).getLines.mkString("\n")
       val json  = yaml.parser.parse(config)
 
       val s2econfig = json
@@ -34,26 +34,29 @@ object S2EConfig {
     val s2eString = "s2e = {" + showLogging(config.s2e.logging) +
       "," + showkleeArgs(config.s2e.kleeArgs) +  "}"
 
-    val convenient = """plugins = {}
-            pluginsConfig = {}
+    val convenient = """
+    plugins = {}
+    pluginsConfig = {}
 
-            dofile('library.lua')
+    dofile('library.lua')
             """
 
     val plugins = showPlugins(config.plugins)
+
+    List(s2eString, convenient, plugins).mkString("\n\n")
 
   }
 
   def showLogging (logging : LoggingOptions) = {
     ("logging = {"
       + "\nconsole = " + logging.console
-      + "\nlogLevel = " + logging.logLevel
+      + ",\nlogLevel = " + logging.logLevel
       + "\n}")
   }
 
   def showkleeArgs(kleeArgs : List[String]) = {
     ("kleeArgs = {\n"
-      + kleeArgs.map {case x => "--\"" + x + "\""}.mkString(",\n")
+      + kleeArgs.map {case x => "\"--" + x + "\""}.mkString(",\n")
       + "\n}")
   }
 
@@ -62,17 +65,24 @@ object S2EConfig {
   }
 
   def showPlugin(plugin : PluginOptions) = {
-    ("add_plugin(" + plugin.name + ")\n"
-      + "pluginsConfig." + plugin.name + "= {"
-      +  plugin.config.map {showConfigObject(_)}.mkString(",\n")
+    val configString =
+      if (plugin.config.length > 0) {
+        ("pluginsConfig." + plugin.name + " = {\n"
+        +  plugin.config.map {showConfigObject(_)}.mkString(",\n")
+        + "}")
+      } else {
+        ""
+      }
+    ("add_plugin(\"" + plugin.name + "\")\n" + configString
     )
   }
 
   def showConfigObject(c : PluginConfig) : String = {
-    c match {
-      case PluginConfig(name, ConfigString(s)) =>  name + "=" + s
-      case PluginConfig(name, conf@PluginConfig(_,_)) => name + " = {\n" + showConfigObject(conf) + "\n}"
-    }
+    (c.name + " = " + c.value)
+    // c match {
+    //   case PluginConfig(name, ConfigString(s)) =>  name + "=" + s
+    //   case PluginConfig(name, conf@PluginConfig(_,_)) => name + " = {\n" + showConfigObject(conf) + "\n}"
+    // }
 
   }
 }
