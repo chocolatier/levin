@@ -12,7 +12,12 @@ libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3"
 libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging" % "3.9.0"
 
 resolvers += "Typesafe Repo" at "http://repo.typesafe.com/typesafe/releases/"
+resolvers += Resolver.sonatypeRepo("snapshots")
+
 libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.7"
+
+libraryDependencies += "io.circe" %% "circe-yaml" % "0.6.1"
+libraryDependencies += "io.circe" %% "circe-generic" % "0.8.0"
 
 libraryDependencies += "com.github.pureconfig" %% "pureconfig" % "0.9.1"
 
