@@ -76,7 +76,9 @@ object LStar {
     var table = lStarInitialise(terminalMap)
     do  {
       while (!isLStarConsistent(table) || !isLStarClosed(table)){
-        table = lStarClose(table)
+        if (!isLStarClosed(table)){
+          table = lStarClose(table)          
+        }
         if (!isLStarConsistent(table)){
           table = lStarConsistent(table)
         }
