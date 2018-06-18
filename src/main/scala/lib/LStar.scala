@@ -13,11 +13,7 @@ object LStar {
 
   type Sentence = List[String]
 
-  // var sta = Set.empty : Set[STA]
-  // var red = Set.empty : Set[Red]
-  // var blue = Set.empty : Set[Blue]
-
-  case class Table (red : Set[Red], blue : Set[Blue], observation_cache: Map[Sentence, Boolean], experiment : Set[Sentence])
+  case class Table (red : Set[Red], blue : Set[Blue], observation_cache: Map[Sentence, Boolean], experiment : Set[Sentence], terminalMap : Map[String, List[Tuple2[Int, Int]]])
 
   def lStarInitialise(terminalMap: Map[String, List[Tuple2[Int, Int]]]) : Table = {
     var red = Set(Red(List()))
@@ -34,7 +30,7 @@ object LStar {
       observation_cache += (x.s -> membershipQuery(x.s, List(), terminalMap))
     }
 
-    Table (red, blue, observation_cache, exp)
+    Table (red, blue, observation_cache, exp, terminalMap)
 
   }
 
@@ -67,7 +63,34 @@ object LStar {
     return true
   }
 
+  def lookupTableRow (s : Sentence, t : Table) : Map[Sentence, Boolean] = {
+    t.observation_cache.filterKeys(_.take(s.length) == s)
+  }
+
+  def tableRowsEqual(s1 : Sentence, t1 : Map[Sentence, Boolean], s2: Sentence, t2 : Map[Sentence, Boolean]) : Boolean = {
+    for (x <- t1.keySet) {
+      if (t1(x) != t2(s2 ++ x.drop(s1.length))) {
+        return false
+      }
+    }
+    return true
+  }
+
   def isLStarConsistent(table: Table) : Boolean = {
+    // TODO: Optimize
+    for (x <- table.red) {
+      for (y <- table.red) {
+        val xrow = lookupTableRow(x.s, table)
+        val yrow = lookupTableRow(y.s, table)
+        if (tableRowsEqual(x.s, xrow, y.s, yrow)){
+          for (t <- table.terminalMap.keySet) {
+            if (membershipQuery(x.s, List(t), table.terminalMap) != membershipQuery(y.s, List(t), table.terminalMap)){
+              return false
+            }
+          }
+        }
+      }
+    }
     return true
   }
 
