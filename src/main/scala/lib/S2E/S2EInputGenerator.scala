@@ -20,6 +20,10 @@ object S2EInputGenerator {
     newCase
   }
 
+  def generateCharacterVector (s : String) = {
+    s.map(_.toInt)
+  }
+
   def generateInputsForGrammar (g : Grammar, start : String) : Seq[String] = {
     val startGram = g.exprMap (start)
 
