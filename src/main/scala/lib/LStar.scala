@@ -14,19 +14,31 @@ object LStar {
   type Sentence = List[String]
 
   // var sta = Set.empty : Set[STA]
-  // var exp = Set.empty : Set[Sentence]
   // var red = Set.empty : Set[Red]
   // var blue = Set.empty : Set[Blue]
 
-  case class Table (observation_cache: Map[String, Int], experiment : List[Sentence])
+  case class Table (red : Set[Red], blue : Set[Blue], observation_cache: Map[Sentence, Boolean], experiment : Set[Sentence])
 
   def lStarInitialise(terminalMap: Map[String, List[Tuple2[Int, Int]]]) : Table = {
     var red = Set(Red(List()))
     var blue = terminalMap.keys.map{case x => Blue(List(x))}.toSet
+    var exp = Set(List()) : Set[Sentence]
+
+    var observation_cache = Map (List() -> membershipQuery(List(), List(), terminalMap)) : Map[Sentence, Boolean]
+
+    for (x <- red) {
+      observation_cache += (x.s -> membershipQuery(x.s, List(), terminalMap))
+    }
+
+    for (x <- blue) {
+      observation_cache += (x.s -> membershipQuery(x.s, List(), terminalMap))
+    }
+
+    Table (red, blue, observation_cache, exp)
 
   }
 
-  def OT (u : Sentence, e : Sentence, terminalMap : Map[String, List[Tuple2[Int, Int]]]) : Boolean = {
+  def membershipQuery (u : Sentence, e : Sentence, terminalMap : Map[String, List[Tuple2[Int, Int]]]) : Boolean = {
     val newSeq = SequenceG(((u ++ e).map {case x => NameG(x)}))
     val subGram = Grammar (Map("Expr" -> newSeq), terminalMap)
 
