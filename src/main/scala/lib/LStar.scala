@@ -129,11 +129,35 @@ object LStar {
       }
     }
 
-    return table
+    return Table(red, blue, observation_cache, table.experiment, table.terminalMap)
   }
 
   def lStarConsistent(table : Table) : Table = {
-    table
+    // TODO: Optimize
+    var exp = table.experiment
+    var observation_cache = table.observation_cache
+
+    for (x <- table.red) {
+      for (y <- table.red) {
+        if (tableRowsEqual (x, lookupTableRow(x, table), y,lookupTableRow(y, table))){
+          for (t <- table.terminalMap.keySet){
+            if (membershipQuery(x, List(t), table.terminalMap) != membershipQuery(y, List(t), table.terminalMap)){
+              exp += (x ++ List(t))
+            }
+          }
+        }
+      }
+    }
+
+    for (x <- table.red) {
+      for (e <- table.experiment) {
+        if (!observation_cache.contains(x ++ e)) {
+          observation_cache += (x ++ e -> membershipQuery(x, e, table.terminalMap))
+        }
+      }
+    }
+
+    table.copy(experiment = exp, observation_cache = observation_cache)
   }
 
   def lStar(terminalMap: Map[String, List[Tuple2[Int, Int]]]) = {
