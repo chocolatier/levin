@@ -90,15 +90,45 @@ object LStar {
     return true
   }
 
+  // TODO: LStarEq and LStarUseEQ after linking levin back to S2E
+  // General idea: Check if we get 100% coverage by executing
+  // every sentence. Otherwise use DSE to explore uncovered branch
+  // and generate a counter-example
+
   def lStarUseEQ (table : Table, answer : Boolean) : Table = {
     return table
   }
 
+  // TODO
+  // Checks if the grammar is equivalent
   def lStarEq (table : Table) : Boolean = {
     return false
   }
 
+
   def lStarClose (table : Table) : Table = {
+    var red = table.red
+    var blue = table.blue
+    var observation_cache = table.observation_cache
+    for (s <- table.blue) {
+      val redRows = table.red.map(lookupTableRow(_, table))
+      if (!(redRows `contains` lookupTableRow(s, table))) {
+        red += s
+        blue -=s
+        for (a <- table.terminalMap.keySet){
+          blue += (s ++ List(a))
+        }
+      }
+
+      for (x <- table.red) {
+        for (e <- table.experiment) {
+          if (!observation_cache.contains(x ++ e)) {
+            observation_cache += (x ++ e -> membershipQuery(x, e, table.terminalMap))
+          }
+        }
+      }
+    }
+
     return table
   }
 
