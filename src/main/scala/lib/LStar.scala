@@ -48,6 +48,22 @@ object LStar {
   }
 
   def isLStarClosed(table : Table) : Boolean = {
+    for (x <- table.red) {
+      for (e <- table.experiment) {
+        if (!table.observation_cache.contains(x.s ++ e)){
+          return false;
+        }
+      }
+    }
+
+    for (x <- table.blue) {
+      for (e <- table.experiment) {
+        if (!table.observation_cache.contains(x.s ++ e)){
+          return false;
+        }
+      }
+    }
+
     return true
   }
 
@@ -77,7 +93,7 @@ object LStar {
     do  {
       while (!isLStarConsistent(table) || !isLStarClosed(table)){
         if (!isLStarClosed(table)){
-          table = lStarClose(table)          
+          table = lStarClose(table)
         }
         if (!isLStarConsistent(table)){
           table = lStarConsistent(table)
