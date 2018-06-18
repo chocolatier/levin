@@ -7,27 +7,23 @@ import levin.GrammarMutator._
 
 object LStar {
 
-  sealed trait STA
-  case class Red (s: Sentence) extends STA
-  case class Blue (s : Sentence) extends STA
-
   type Sentence = List[String]
 
-  case class Table (red : Set[Red], blue : Set[Blue], observation_cache: Map[Sentence, Boolean], experiment : Set[Sentence], terminalMap : Map[String, List[Tuple2[Int, Int]]])
+  case class Table (red : Set[Sentence], blue : Set[Sentence], observation_cache: Map[Sentence, Boolean], experiment : Set[Sentence], terminalMap : Map[String, List[Tuple2[Int, Int]]])
 
   def lStarInitialise(terminalMap: Map[String, List[Tuple2[Int, Int]]]) : Table = {
-    var red = Set(Red(List()))
-    var blue = terminalMap.keys.map{case x => Blue(List(x))}.toSet
+    var red = Set(List()) : Set[Sentence]
+    var blue = terminalMap.keys.map{case x => (List(x))}.toSet
     var exp = Set(List()) : Set[Sentence]
 
     var observation_cache = Map (List() -> membershipQuery(List(), List(), terminalMap)) : Map[Sentence, Boolean]
 
     for (x <- red) {
-      observation_cache += (x.s -> membershipQuery(x.s, List(), terminalMap))
+      observation_cache += (x -> membershipQuery(x, List(), terminalMap))
     }
 
     for (x <- blue) {
-      observation_cache += (x.s -> membershipQuery(x.s, List(), terminalMap))
+      observation_cache += (x -> membershipQuery(x, List(), terminalMap))
     }
 
     Table (red, blue, observation_cache, exp, terminalMap)
@@ -46,7 +42,7 @@ object LStar {
   def isLStarClosed(table : Table) : Boolean = {
     for (x <- table.red) {
       for (e <- table.experiment) {
-        if (!table.observation_cache.contains(x.s ++ e)){
+        if (!table.observation_cache.contains(x ++ e)){
           return false;
         }
       }
@@ -54,7 +50,7 @@ object LStar {
 
     for (x <- table.blue) {
       for (e <- table.experiment) {
-        if (!table.observation_cache.contains(x.s ++ e)){
+        if (!table.observation_cache.contains(x ++ e)){
           return false;
         }
       }
@@ -80,11 +76,11 @@ object LStar {
     // TODO: Optimize
     for (x <- table.red) {
       for (y <- table.red) {
-        val xrow = lookupTableRow(x.s, table)
-        val yrow = lookupTableRow(y.s, table)
-        if (tableRowsEqual(x.s, xrow, y.s, yrow)){
+        val xrow = lookupTableRow(x, table)
+        val yrow = lookupTableRow(y, table)
+        if (tableRowsEqual(x, xrow, y, yrow)){
           for (t <- table.terminalMap.keySet) {
-            if (membershipQuery(x.s, List(t), table.terminalMap) != membershipQuery(y.s, List(t), table.terminalMap)){
+            if (membershipQuery(x, List(t), table.terminalMap) != membershipQuery(y, List(t), table.terminalMap)){
               return false
             }
           }
