@@ -4,6 +4,7 @@ import levin.GrammarInference._
 import levin.GrammarMutator._
 import levin.S2EInputGenerator._
 import levin.S2EConfig._
+import levin.IteratedBruteforce._
 
 object cli {
   def main(args: Array[String]) : Unit = {
@@ -41,7 +42,10 @@ object cli {
     println (ig.show(ig))
     println (disj.toSeq(0).show(disj.toSeq(0)))
 
+    println(generateSentences(disj.toSeq(0).exprMap("Expr")))
+
     generateInputsForGrammar(disj.toSeq(0), "Expr")
+
 
   }
 }
