@@ -18,6 +18,7 @@ object cli {
         levinConf.BinaryLocation = lC.binaryLocation
         levinConf.TestFile = lC.testFile
         levinConf.ProjectLocation = lC.projectLocation
+        levinConf.Executable = lC.executable
       }
       case Left(_) => throw new Exception("Malformed Configuration File")
     }
