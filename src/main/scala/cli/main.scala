@@ -23,7 +23,10 @@ object cli {
 
 
     val v = parseYAMLConfig("./src/main/resources/config.yml")
-    val cfg = (generateConfigFile(v))
+    // val cfg = (generateConfigFile(v))
+    val cfgu = updatePluginsConfig(v.plugins, "AddEqualityRestriction", "eqVector", "{97, 98, 99}")
+
+    val cfg = generateConfigFile(v.copy(plugins = cfgu))
 
     val fw = new java.io.FileWriter(levinConf.ProjectLocation + "s2e-config.lua")
     println (cfg)

@@ -85,4 +85,15 @@ object S2EConfig {
     // }
 
   }
+
+  def updatePluginsConfig(plugins : List[PluginOptions], targetPlugin : String, updateName : String, updateValue : String) = {
+    val remainingConfigs = plugins.filter(_.name != targetPlugin)
+    val targetConfig = plugins.filter(_.name == targetPlugin)(0)
+
+    val remainingValues = targetConfig.config.filter(_.name != updateName)
+    val updatedName = PluginConfig(updateName,updateValue)::remainingValues
+    val update = PluginOptions(targetPlugin, updatedName)
+
+    (update) :: remainingConfigs
+  }
 }
