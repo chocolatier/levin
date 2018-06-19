@@ -1,5 +1,8 @@
 package levin
 
+import sys.process._
+import scala.language.postfixOps
+
 import levin.S2EBootstrap._
 import levin.S2EConfig._
 
@@ -20,6 +23,8 @@ object S2EGenerateGrammar {
     val bsfw = new java.io.FileWriter(levinConf.ProjectLocation + "bootstrap.sh")
     bsfw.write(bootstrap)
     bsfw.close
+
+    val s = sys.process.Process(Seq("./launch-s2e.sh"), new java.io.File(levinConf.ProjectLocation))!;
 
   }
 }
