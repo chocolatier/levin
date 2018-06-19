@@ -16,6 +16,7 @@ object cli {
         levinConf.SMT2ConstraintDir = lC.smt2ConstraintDir
         levinConf.BinaryLocation = lC.binaryLocation
         levinConf.TestFile = lC.testFile
+        levinConf.ProjectLocation = lC.projectLocation
       }
       case Left(_) => throw new Exception("Malformed Configuration File")
     }
@@ -24,7 +25,7 @@ object cli {
     val v = parseYAMLConfig("./src/main/resources/config.yml")
     val cfg = (generateConfigFile(v))
 
-    val fw = new java.io.FileWriter("s2e-config.lua")
+    val fw = new java.io.FileWriter(levinConf.ProjectLocation + "s2e-config.lua")
     println (cfg)
     fw.write(cfg)
     fw.close
