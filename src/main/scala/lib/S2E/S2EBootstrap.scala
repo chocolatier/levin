@@ -3,7 +3,7 @@
 package levin
 
 object S2EBootstrap {
-  def generateBootstrap(length: Int, executable: String) {
+  def generateBootstrap(length: Int, executable: String) = {
     val truncFile = preTruncFile + length.toString + postTruncFile
 
    (truncFile + "\n ${S2EGET} " + executable +
