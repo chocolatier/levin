@@ -42,7 +42,7 @@ object cli {
     println (ig.show(ig))
     println (disj.toSeq(0).show(disj.toSeq(0)))
 
-    println(generateSentences(disj.toSeq(0).exprMap("Expr")))
+    println(generateSentences(disj.toSeq(0).exprMap("Expr")).map(concretiseSentence(_, disj.toSeq(0))))
 
     generateInputsForGrammar(disj.toSeq(0), "Expr")
 

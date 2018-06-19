@@ -1,5 +1,7 @@
 package levin
 
+import levin.TestCaseGenerator._
+
 object IteratedBruteforce {
 
   def generateSentences(g : Gram) : List[List[NameG]] = {
@@ -10,5 +12,10 @@ object IteratedBruteforce {
       case LoopG(x) => generateSentences(x)
       case x@NameG(_) => List(List(x))
     }
+  }
+
+  def concretiseSentence(s : List[NameG], g : Grammar) = {
+    val tempSeq = SequenceG(s.toSeq)
+    expandExpression(g, tempSeq)
   }
 }
