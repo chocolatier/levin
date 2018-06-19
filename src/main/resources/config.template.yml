@@ -1,0 +1,76 @@
+s2e:
+  logging:
+    console: "debug"
+    logLevel: "debug"
+  kleeArgs:
+    - "verbose-fork-info"
+    - "fork-on-symbolic-address=false"
+    - "use-query-log=all:kquery"
+
+plugins:
+  - name: "BaseInstructions"
+    config: []
+  - name: "HostFiles"
+    config:
+    - name: "baseDirs"
+      value: "{\"/path/to/directory/\"}"
+    - name: "allowWrite"
+      value: "true"
+  - name: "Vmi"
+    config:
+    - name: "baseDirs"
+      value: "{\"/path/to/directory/\"}"
+  - name: "ExecutionTracer"
+    config : []
+  - name: "ModuleTracer"
+    config: []
+  - name: "KeyValueStore"
+    config: []
+  - name: "TranslationBlockCoverage"
+    config:
+      - name: "writeCoverageOnStateKill"
+        value: "true"
+  - name: "ModuleExecutionDetector"
+    config:
+      - name: "mod_0"
+        value: "{ \
+          moduleName = \"executable_name\", \
+          kernelMode = false,}"
+  - name: "ForkLimiter"
+    config:
+      - name : "maxForkCount"
+        value : "-1"
+      - name : "processForkDelay"
+        value : "5"
+  - name: "ProcessExecutionDetector"
+    config:
+      - name : "moduleNames"
+        value: "{\"executable_name\"}"
+  - name: "LinuxMonitor"
+    config:
+      - name : "terminateOnSegfault"
+        value : "true"
+      - name: "terminateOnTrap"
+        value : "true"
+  - name: "TestCaseGenerator"
+    config:
+      - name : "generateOnStateKill"
+        value : "true"
+      - name : "generateOnSegfault"
+        value : "true"
+  - name: "RestrictAscii"
+    config : []
+  - name: "LogConstraintsOnKill"
+    config :
+      - name: "multiFile"
+        value: "true"
+  - name: "LogConstraintsWithFork"
+    config : []
+  - name: "StateTreeLogger"
+    config : []
+  - name: "TranslationBlockTracer2"
+    config : []
+  # - name: "AddEqualityRestriction"
+  #   config:
+  #     - name: "eqVector"
+  #       value: "{65,66,67}"
