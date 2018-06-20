@@ -32,6 +32,7 @@ object cli {
     // kqueryToSMT2(3, "./cache/" + levinConf.Executable + "/init-3/")
 
     val v = parseYAMLConfig("./src/main/resources/config.yml")
+    learningLoop(3,4,v)
     // // val cfg = (generateConfigFile(v))
     // val cfgu = updatePluginsConfig(v.plugins, "AddEqualityRestriction", "eqVector", "{97, 98, 99}")
     //
@@ -44,10 +45,10 @@ object cli {
 
 
     // Testing Garbage
-    val ig = generateInitialGrammar("./cache/" + levinConf.Executable + "/init-3/")
+    // val ig = generateInitialGrammar("./cache/" + levinConf.Executable + "/init-3/")
     // val cT = ig.exprMap.values.map(classifyTerms)
-    val disj = disjunctTermsByPerm(ig)
-    val newG =  runS2E(4, v, disj.toSeq(0))
+    // val disj = disjunctTermsByPerm(ig)
+    // val newG =  runS2E(4, v, disj.toSeq(0))
     // val disjNewG = disjunctTermsByPerm(newG)
     // println (disjNewG.toSeq(0).show(disjNewG.toSeq(0)))
     // println (disj.toSeq(0).show(disj.toSeq(0)))
