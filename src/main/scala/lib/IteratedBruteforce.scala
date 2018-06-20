@@ -6,6 +6,8 @@ import levin.S2EConfig._
 import levin.S2EInputGenerator._
 import levin.S2EGenerateGrammar._
 
+import levin.GrammarInference._
+
 object IteratedBruteforce {
 
   def generateSentences(g : Gram) : List[List[NameG]] = {
@@ -29,7 +31,9 @@ object IteratedBruteforce {
 
     val restrictEqLists = concreteSentences.map(generateCharacterVector(_))
 
-    for (x <- restrictEqLists) {
+    var newGrammar = g
+
+    for ((s, x) <- (sentences zip restrictEqLists)) {
       val updatedPlugins = updatePluginsConfig(config.plugins, "AddEqualityRestriction", "eqVector", x)
       val updatedConfig = config.copy(plugins = updatedPlugins)
 
@@ -39,7 +43,35 @@ object IteratedBruteforce {
       println("name is " + name)
 
       init(length, updatedConfig)
-      kqueryToSMT2(length, "./cache/" + levinConf.Executable + "/" + name + "/")
+
+      val kqueryDir = "./cache/" + levinConf.Executable + "/iter-" + length.toString + "/" + name + "/"
+
+      kqueryToSMT2(length, kqueryDir)
+
+      for ((_,gvec) <- buildGrammarVec(kqueryDir)){
+        val oldExprMap = newGrammar.exprMap
+        val oldExpr = oldExprMap("Expr")
+
+        val termName = lookupTerminal(g, gvec(length-1))
+        val updatedGram = SequenceG(s ++ List(NameG(termName)))
+
+        val newExprMap = oldExprMap + ("Expr" -> addAlternative(oldExpr, updatedGram))
+
+        newGrammar = newGrammar.copy(exprMap = newExprMap)
+      }
+    }
+    newGrammar
+  }
+
+  def lookupTerminal (g: Grammar, t : List[Tuple2[Int,Int]]) = {
+    println(t)
+    g.terminalMap.find(_._2.toSet == t.toSet).get._1
+  }
+
+  def addAlternative(g : Gram, n : Gram) : Gram = {
+    g match {
+      case AlternativeG(alternatives) => AlternativeG(alternatives + n)
+      case _ => throw new Exception("Expected Alternative")
     }
 
   }

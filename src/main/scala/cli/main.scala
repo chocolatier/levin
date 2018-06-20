@@ -27,9 +27,9 @@ object cli {
       case Left(_) => throw new Exception("Malformed Configuration File")
     }
 
-    init(3)
+    // init(3)
 
-    kqueryToSMT2(3, "./cache/" + levinConf.Executable + "/init-3/")
+    // kqueryToSMT2(3, "./cache/" + levinConf.Executable + "/init-3/")
 
     val v = parseYAMLConfig("./src/main/resources/config.yml")
     // // val cfg = (generateConfigFile(v))
@@ -45,10 +45,11 @@ object cli {
 
     // Testing Garbage
     val ig = generateInitialGrammar("./cache/" + levinConf.Executable + "/init-3/")
-    val cT = ig.exprMap.values.map(classifyTerms)
+    // val cT = ig.exprMap.values.map(classifyTerms)
     val disj = disjunctTermsByPerm(ig)
-    runS2E(5, v, disj.toSeq(0))
-    // println (ig.show(ig))
+    val newG =  runS2E(4, v, disj.toSeq(0))
+    // val disjNewG = disjunctTermsByPerm(newG)
+    // println (disjNewG.toSeq(0).show(disjNewG.toSeq(0)))
     // println (disj.toSeq(0).show(disj.toSeq(0)))
     //
     // println(generateSentences(disj.toSeq(0).exprMap("Expr")).map(concretiseSentence(_, disj.toSeq(0))))
