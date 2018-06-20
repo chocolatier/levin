@@ -29,7 +29,7 @@ object cli {
 
     // init(3)
 
-    kqueryToSMT2(3)
+    kqueryToSMT2(3, "./cache/" + levinConf.Executable + "/init-3/")
 
     // val v = parseYAMLConfig("./src/main/resources/config.yml")
     // // val cfg = (generateConfigFile(v))

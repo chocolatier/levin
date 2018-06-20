@@ -29,19 +29,21 @@ object S2EGenerateGrammar {
     val s = sys.process.Process(Seq("./launch-s2e.sh"), new java.io.File(levinConf.ProjectLocation))!;
   }
 
-  def kqueryToSMT2(length : Int, outdir : String = "s2e-last/") {
+  def kqueryToSMT2(length : Int, writedir: String ,s2eoutdir : String = "s2e-last/") {
 
     println("Converting kq to kquery")
-    sys.process.Process(Seq("python", "./src/main/misc_scripts/to_kquery.py", levinConf.ProjectLocation + outdir, length.toString, levinConf.ProjectLocation + outdir + "all-queries.kquery"))!;
+    sys.process.Process(Seq("python", "./src/main/misc_scripts/to_kquery.py", levinConf.ProjectLocation + s2eoutdir, length.toString, levinConf.ProjectLocation + s2eoutdir + "all-queries.kquery"))!;
 
-    val kqueryDir = Paths.get(levinConf.ProjectLocation + outdir)
+    new java.io.File(writedir).mkdirs
+
+    val kqueryDir = Paths.get(levinConf.ProjectLocation + s2eoutdir)
 
     // XXX: GROSS
     // Gets all the kquery files
     println("Converting kquery to SMT2")
     for (file <- kqueryDir.toFile.listFiles.filter(_.getName.dropWhile(_ != '.') == ".kquery")) {
       val smt2 = (levinConf.Kleaver + " -print-smtlib " + file.getCanonicalPath).!!
-      writeFile("./cache/" + file.getName + ".smt2", smt2)
+      writeFile(writedir + file.getName + ".smt2", smt2)
     }
 
   }
