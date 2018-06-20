@@ -6,3 +6,7 @@ binary-location = ""
 // testFile = ""
 // The location of the target S2E Project
 project-location = ""
+// The Executable
+executable = ""
+// Kleaver Location
+kleaver = ""

@@ -3,28 +3,46 @@ package levin
 import sys.process._
 import scala.language.postfixOps
 
+import java.nio.file._
+
 import levin.S2EBootstrap._
 import levin.S2EConfig._
 
 object S2EGenerateGrammar {
+
+  def writeFile(path : String, contents : String) {
+    val fw = new java.io.FileWriter(path)
+    fw.write(contents)
+    fw.close
+      }
 
   // Does the first run
   def init(length : Int) {
     // Maybe include the S2E Config path in main config?
     val config = parseYAMLConfig("./src/main/resources/config.yml")
     val configFile = generateConfigFile(config)
+    writeFile(levinConf.ProjectLocation + "s2e-config.lua",configFile)
 
     val bootstrap = generateBootstrap(length, levinConf.Executable)
-
-    val fw = new java.io.FileWriter(levinConf.ProjectLocation + "s2e-config.lua")
-    fw.write(configFile)
-    fw.close
-
-    val bsfw = new java.io.FileWriter(levinConf.ProjectLocation + "bootstrap.sh")
-    bsfw.write(bootstrap)
-    bsfw.close
+    writeFile(levinConf.ProjectLocation + "bootstrap.sh", bootstrap)
 
     val s = sys.process.Process(Seq("./launch-s2e.sh"), new java.io.File(levinConf.ProjectLocation))!;
+  }
+
+  def kqueryToSMT2(length : Int, outdir : String = "s2e-last/") {
+
+    println("Converting kq to kquery")
+    sys.process.Process(Seq("python", "./src/main/misc_scripts/to_kquery.py", levinConf.ProjectLocation + outdir, length.toString, levinConf.ProjectLocation + outdir + "all-queries.kquery"))!;
+
+    val kqueryDir = Paths.get(levinConf.ProjectLocation + outdir)
+
+    // XXX: GROSS
+    // Gets all the kquery files
+    println("Converting kquery to SMT2")
+    for (file <- kqueryDir.toFile.listFiles.filter(_.getName.dropWhile(_ != '.') == ".kquery")) {
+      val smt2 = (levinConf.Kleaver + " -print-smtlib " + file.getCanonicalPath).!!
+      writeFile("./cache/" + file.getName + ".smt2", smt2)
+    }
 
   }
 }

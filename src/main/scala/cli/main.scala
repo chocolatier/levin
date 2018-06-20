@@ -22,11 +22,14 @@ object cli {
         levinConf.TestFile = lC.testFile
         levinConf.ProjectLocation = lC.projectLocation
         levinConf.Executable = lC.executable
+        levinConf.Kleaver = lC.kleaver
       }
       case Left(_) => throw new Exception("Malformed Configuration File")
     }
 
-    init(3)
+    // init(3)
+
+    kqueryToSMT2(3)
 
     // val v = parseYAMLConfig("./src/main/resources/config.yml")
     // // val cfg = (generateConfigFile(v))

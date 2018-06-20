@@ -5,6 +5,7 @@ case class LevinConfig(
   binaryLocation: String,
   projectLocation : String,
   executable : String,
+  kleaver : String,
   testFile: String = "testFile"
 )
 
@@ -14,4 +15,5 @@ package object levinConf  {
   var ProjectLocation = ""
   var Executable = ""
   var TestFile = ""
+  var Kleaver = ""
 }

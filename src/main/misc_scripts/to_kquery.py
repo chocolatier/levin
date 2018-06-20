@@ -25,7 +25,9 @@ if (len(sys.argv) == 4):
 else:
     y = []
 
-for f in getFiles(os.listdir(conversion_dir)):
+fileList = getFiles(os.listdir(conversion_dir))
+
+for f in filter(lambda x: os.path.splitext(x)[1] == ".kq", fileList):
     x = open(os.path.join(conversion_dir,f)).read()
     new_str = to_kquery(x, size, y)
     g = open(os.path.join(conversion_dir,str(f)[:-3] + ".kquery"), "w")
