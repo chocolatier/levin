@@ -48,9 +48,10 @@ object GrammarInference {
     Grammar(Map("Expr" -> expr), tM)
   }
 
-  // For now just working on top level AlternativeG[SequenceT]
+  // For now just working on top level AlternativeG(SequenceG)
   def classifyTerms (g : Gram) = {
     println ("classifing terms")
+    println(g)
     var edgeMap = Map[String, Tuple2[Int, Int]]()
     g match {
       case AlternativeG (alts) => {

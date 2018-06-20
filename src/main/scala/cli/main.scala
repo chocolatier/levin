@@ -48,8 +48,8 @@ object cli {
     // val cT = ig.exprMap.values.map(classifyTerms)
     val disj = disjunctTermsByPerm(ig)
     val newG =  runS2E(4, v, disj.toSeq(0))
-    // val disjNewG = disjunctTermsByPerm(newG)
-    // println (disjNewG.toSeq(0).show(disjNewG.toSeq(0)))
+    val disjNewG = disjunctTermsByPerm(newG)
+    println (disjNewG.toSeq(0).show(disjNewG.toSeq(0)))
     // println (disj.toSeq(0).show(disj.toSeq(0)))
     //
     // println(generateSentences(disj.toSeq(0).exprMap("Expr")).map(concretiseSentence(_, disj.toSeq(0))))
