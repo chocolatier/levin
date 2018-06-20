@@ -42,8 +42,8 @@ object GrammarInference {
     AlternativeG(m.map(mapToSequenceG).toSet)
   }
 
-  def generateInitialGrammar () = {
-    val expr = mapToAlternativeG(buildGrammarVec(levinConf.SMT2ConstraintDir).map(_._2).toList)
+  def generateInitialGrammar (constraintDir : String = levinConf.SMT2ConstraintDir) = {
+    val expr = mapToAlternativeG(buildGrammarVec(constraintDir).map(_._2).toList)
     val tM = t.map(_.swap).toMap
     Grammar(Map("Expr" -> expr), tM)
   }

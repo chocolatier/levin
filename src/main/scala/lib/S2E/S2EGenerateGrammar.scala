@@ -40,7 +40,7 @@ object S2EGenerateGrammar {
     // XXX: GROSS
     // Gets all the kquery files
     println("Converting kquery to SMT2")
-    for (file <- kqueryDir.toFile.listFiles.filter(_.getName.dropWhile(_ != '.') == ".kquery")) {
+    for (file <- kqueryDir.toFile.listFiles.filter {case x => (x.getName.dropWhile(_ != '.') == ".kquery") && (x.getName != "all-queries.kquery")} ) {
       val smt2 = (levinConf.Kleaver + " -print-smtlib " + file.getCanonicalPath).!!
       writeFile(writedir + file.getName + ".smt2", smt2)
     }
