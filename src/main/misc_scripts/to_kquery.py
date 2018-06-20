@@ -20,12 +20,13 @@ def grab_const_arrays(fileloc):
     print(set(x))
     return set(x)
 
+if (len(sys.argv) == 4):
+    y = grab_const_arrays(sys.argv[3])
+else:
+    y = []
+
 for f in getFiles(os.listdir(conversion_dir)):
     x = open(os.path.join(conversion_dir,f)).read()
-    if (len(sys.argv) == 4):
-        y = grab_const_arrays(sys.argv[3])
-    else:
-        y = []
     new_str = to_kquery(x, size, y)
     g = open(os.path.join(conversion_dir,str(f)[:-3] + ".kquery"), "w")
     g.write(new_str)
