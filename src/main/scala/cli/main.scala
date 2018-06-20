@@ -47,7 +47,7 @@ object cli {
     val ig = generateInitialGrammar("./cache/" + levinConf.Executable + "/init-3/")
     val cT = ig.exprMap.values.map(classifyTerms)
     val disj = disjunctTermsByPerm(ig)
-    runS2E(4, v, disj.toSeq(0))
+    runS2E(5, v, disj.toSeq(0))
     // println (ig.show(ig))
     // println (disj.toSeq(0).show(disj.toSeq(0)))
     //

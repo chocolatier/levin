@@ -35,7 +35,7 @@ object IteratedBruteforce {
 
       // Small brain : Actually handling the null string
       // Ascended brain : Removing it and appending a string to guarantee it will be non empty
-      val name = x + x.init.tail.split(",").map(_.toInt).filter(_ != 0).map(_.toChar).mkString
+      val name = x + x.init.tail.split(",").map(_.toInt).filter(_ != 0).map {case 47 => 63; case x => x} .map(_.toChar).mkString
       println("name is " + name)
 
       init(length, updatedConfig)
