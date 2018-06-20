@@ -45,7 +45,8 @@ object cli {
 
     // Testing Garbage
     val ig = generateInitialGrammar("./cache/" + levinConf.Executable + "/init-3/")
-    // val cT = ig.exprMap.values.map(classifyTerms)
+    val cT = ig.exprMap.values.map(classifyTerms)
+    println(cT)
     val disj = disjunctTermsByPerm(ig)
     val newG =  runS2E(4, v, disj.toSeq(0))
     val disjNewG = disjunctTermsByPerm(newG)

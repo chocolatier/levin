@@ -49,6 +49,7 @@ object GrammarInference {
   }
 
   // For now just working on top level AlternativeG(SequenceG)
+  // Counts the number of edges that go into/out of a node.
   def classifyTerms (g : Gram) = {
     println ("classifing terms")
     println(g)
@@ -61,7 +62,9 @@ object GrammarInference {
               case SequenceG (sq) => {
                 edgeMap = edgeMap combine countEdges(sq)
               }
-              case _ => throw new NotImplementedError()
+              case x => {
+                System.err.println("[Warning] Skipping " + alt.toString)
+              }
             }
           }
       }
