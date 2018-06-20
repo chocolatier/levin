@@ -17,9 +17,8 @@ object S2EGenerateGrammar {
       }
 
   // Does the first run
-  def init(length : Int) {
+  def init(length : Int, config : S2EConfig = parseYAMLConfig("./src/main/resources/config.yml")) {
     // Maybe include the S2E Config path in main config?
-    val config = parseYAMLConfig("./src/main/resources/config.yml")
     val configFile = generateConfigFile(config)
     writeFile(levinConf.ProjectLocation + "s2e-config.lua",configFile)
 

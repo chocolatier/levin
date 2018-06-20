@@ -21,7 +21,7 @@ object S2EInputGenerator {
   }
 
   def generateCharacterVector (s : String) = {
-    s.map(_.toInt)
+    "{" + s.map(_.toInt).mkString(",") + "}"
   }
 
   def generateInputsForGrammar (g : Grammar, start : String) : Seq[String] = {

@@ -29,9 +29,9 @@ object cli {
 
     // init(3)
 
-    kqueryToSMT2(3, "./cache/" + levinConf.Executable + "/init-3/")
+    // kqueryToSMT2(3, "./cache/" + levinConf.Executable + "/init-3/")
 
-    // val v = parseYAMLConfig("./src/main/resources/config.yml")
+    val v = parseYAMLConfig("./src/main/resources/config.yml")
     // // val cfg = (generateConfigFile(v))
     // val cfgu = updatePluginsConfig(v.plugins, "AddEqualityRestriction", "eqVector", "{97, 98, 99}")
     //
@@ -44,9 +44,10 @@ object cli {
 
 
     // Testing Garbage
-    // val ig = generateInitialGrammar()
-    // val cT = ig.exprMap.values.map(classifyTerms)
-    // val disj = disjunctTermsByPerm(ig)
+    val ig = generateInitialGrammar()
+    val cT = ig.exprMap.values.map(classifyTerms)
+    val disj = disjunctTermsByPerm(ig)
+    runS2E(4, v, disj.toSeq(0))
     // println (ig.show(ig))
     // println (disj.toSeq(0).show(disj.toSeq(0)))
     //
