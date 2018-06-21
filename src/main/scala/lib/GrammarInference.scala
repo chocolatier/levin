@@ -21,18 +21,6 @@ import cats.implicits._
 object GrammarInference {
   var t = new scala.collection.mutable.HashMap[List[Tuple2[Int, Int]], String]
 
-  // TODO: Write printer for modular funcs, remove.
-  def mapToGrammar (m : Map[Int, List[Tuple2[Int, Int]]]) = {
-    val seq = m.toSeq.sortBy(_._1)
-
-    var gram = ""
-
-    for (g <- seq){
-        gram += getName(g._2)
-    }
-    gram
-  }
-
   def mapToSequenceG (m : Map[Int, List[Tuple2[Int, Int]]]) = {
     val seq = m.toSeq.sortBy(_._1)
     SequenceG(seq.map(g => NameG(getName(g._2))))
