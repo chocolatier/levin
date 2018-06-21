@@ -164,6 +164,9 @@ object LStar {
     var answer = false
     var table = lStarInitialise(terminalMap)
     do  {
+      println("Consistency:" + isLStarConsistent(table))
+      println("Closure:" + isLStarClosed(table))
+
       while (!isLStarConsistent(table) || !isLStarClosed(table)){
         if (!isLStarClosed(table)){
           table = lStarClose(table)
@@ -176,6 +179,7 @@ object LStar {
       if (!answer){
         table = lStarUseEQ(table, answer)
       }
+      println(table)
     } while (!answer)
   }
 }

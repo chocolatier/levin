@@ -9,6 +9,8 @@ import levin.S2EInputGenerator._
 import levin.S2EConfig._
 import levin.S2EGenerateGrammar._
 
+import levin.LStar._
+
 object cli {
   def main(args: Array[String]) : Unit = {
 
@@ -45,19 +47,21 @@ object cli {
 
     // Testing Garbage
     val ig = generateInitialGrammar("./cache/" + levinConf.Executable + "/init-3/")
-    val cT = ig.exprMap.values.map(classifyTerms)
-    println(cT)
+    val s = lStar(ig.terminalMap)
 
-    val exprSize = {(x : Gram) => x match {case AlternativeG(x) => x.size}}
-
-
-    val disj = disjunctTermsByPerm(ig)
-    val newG =  runS2E(4, v, disj.toSeq(0))
-    val disjNewG = disjunctTermsByPerm(newG)
-
-    println(exprSize(newG.exprMap("Expr")))
-    println(exprSize(disjNewG.toSeq(0).exprMap("Expr")))
-    println (disjNewG.toSeq(0).show(disjNewG.toSeq(0)))
+    // val cT = ig.exprMap.values.map(classifyTerms)
+    // println(cT)
+    //
+    // val exprSize = {(x : Gram) => x match {case AlternativeG(x) => x.size}}
+    //
+    //
+    // val disj = disjunctTermsByPerm(ig)
+    // val newG =  runS2E(4, v, disj.toSeq(0))
+    // val disjNewG = disjunctTermsByPerm(newG)
+    //
+    // println(exprSize(newG.exprMap("Expr")))
+    // println(exprSize(disjNewG.toSeq(0).exprMap("Expr")))
+    // println (disjNewG.toSeq(0).show(disjNewG.toSeq(0)))
 
     // val newG2 = runS2E(4, v, disjNewG.toSeq(0))
     // val disjNewG2 = disjunctTermsByPerm(newG2)
