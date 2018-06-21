@@ -29,11 +29,12 @@ object IteratedBruteforce {
     val sentences = generateSentences(g.exprMap(start))
     val concreteSentences = sentences.map(concretiseSentence(_, g))
 
-    val restrictEqLists = concreteSentences.map(generateCharacterVector(_))
+    val restrictEqLists = concreteSentences.map(generateCharacterVectors(_))
 
     var newGrammar = g
 
-    for ((s, x) <- (sentences zip restrictEqLists)) {
+    for ((s, xs) <- (sentences zip restrictEqLists)) {
+      for (x <- xs.map(charVecToString(_))){
       val updatedPlugins = updatePluginsConfig(config.plugins, "AddEqualityRestriction", "eqVector", x)
       val updatedConfig = config.copy(plugins = updatedPlugins)
 
@@ -60,6 +61,7 @@ object IteratedBruteforce {
         newGrammar = newGrammar.copy(exprMap = newExprMap)
       }
     }
+  }
     newGrammar
   }
 

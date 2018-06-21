@@ -47,10 +47,22 @@ object cli {
     val ig = generateInitialGrammar("./cache/" + levinConf.Executable + "/init-3/")
     val cT = ig.exprMap.values.map(classifyTerms)
     println(cT)
+
+    val exprSize = {(x : Gram) => x match {case AlternativeG(x) => x.size}}
+
+
     val disj = disjunctTermsByPerm(ig)
     val newG =  runS2E(4, v, disj.toSeq(0))
     val disjNewG = disjunctTermsByPerm(newG)
+
+    println(exprSize(newG.exprMap("Expr")))
+    println(exprSize(disjNewG.toSeq(0).exprMap("Expr")))
     println (disjNewG.toSeq(0).show(disjNewG.toSeq(0)))
+
+    // val newG2 = runS2E(4, v, disjNewG.toSeq(0))
+    // val disjNewG2 = disjunctTermsByPerm(newG2)
+    // println (disjNewG2.toSeq(0).show(disjNewG2.toSeq(0)))
+    //
     // println (disj.toSeq(0).show(disj.toSeq(0)))
     //
     // println(generateSentences(disj.toSeq(0).exprMap("Expr")).map(concretiseSentence(_, disj.toSeq(0))))

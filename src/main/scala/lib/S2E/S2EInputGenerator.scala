@@ -20,8 +20,16 @@ object S2EInputGenerator {
     newCase
   }
 
-  def generateCharacterVector (s : String) = {
-    "{" + s.map(_.toInt).mkString(",") + "}"
+  def generateCharacterVectors (s : String) = {
+    insertGaps (s.map(_.toInt))
+  }
+
+  def charVecToString(l : Seq[Int]) = {
+    "{" + l.mkString(",") + "}"
+  }
+
+  def insertGaps (l : Seq[Int]) = {
+    for (i <- 0 to l.length + 1) yield l.take(i) ++ List(256) ++ l.drop(i)
   }
 
   def generateInputsForGrammar (g : Grammar, start : String) : Seq[String] = {
