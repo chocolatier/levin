@@ -38,6 +38,18 @@ object GrammarInference {
     SequenceG(seq.map(g => NameG(getName(g._2))))
   }
 
+  def buildTerminalMap(gvec : List[Map[Int, List[Tuple2[Int, Int]]]]) : Map[String, List[Tuple2[Int, Int]]] = {
+    var tM = new scala.collection.mutable.HashMap[List[Tuple2[Int, Int]], String]
+
+    for (g <- gvec) {
+      for (v <- g.values) {
+        tM += (v -> generateNewName2(v, tM.toMap))
+      }
+    }
+
+   tM.toMap.map(_.swap).toMap
+  }
+
   def mapToAlternativeG (m : List[Map[Int, List[Tuple2[Int, Int]]]]) = {
     AlternativeG(m.map(mapToSequenceG).toSet)
   }
@@ -161,6 +173,18 @@ object GrammarInference {
     t.get(sorted_f).getOrElse(generateNewName(sorted_f))
   }
 
+  def generateNewName2(f: List[Tuple2[Int, Int]], t : Map[List[Tuple2[Int, Int]], String]) = {
+    val taken = t.values.toList.sorted
+    if (taken.isEmpty){
+      "g0"
+    } else {
+      val n = taken.last.filter(_.isDigit).toInt
+      val newname = "g" + (n + 1).toString
+      newname
+    }
+  }
+
+
   def generateNewName(f: List[Tuple2[Int, Int]]) = {
     val taken = t.values.toList.sorted
     if (taken.isEmpty){
@@ -201,7 +225,7 @@ object GrammarInference {
   }
 
   def buildGrammarVec (path : String) = {
-    val files  = new File(path).listFiles.filter(_.getName.endsWith(".smt2"))
+    val files  = new File(path).listFiles.filter {case x => x.getName.endsWith(".smt2") && x.getName.head == 's'}
     var list = scala.collection.mutable.ListBuffer.empty[Seq[Term]]
 
     var stateConstList = scala.collection.mutable.ListBuffer.empty[(Int,Map[Int, List[Tuple2[Int, Int]]])]
