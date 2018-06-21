@@ -34,6 +34,7 @@ object cli {
     // kqueryToSMT2(3, "./cache/" + levinConf.Executable + "/init-3/")
 
     val v = parseYAMLConfig("./src/main/resources/config.yml")
+    learningLoop(3,4,v)
     // // val cfg = (generateConfigFile(v))
     // val cfgu = updatePluginsConfig(v.plugins, "AddEqualityRestriction", "eqVector", "{97, 98, 99}")
     //

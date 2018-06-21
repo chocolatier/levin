@@ -8,6 +8,9 @@ import java.nio.file._
 import levin.S2EBootstrap._
 import levin.S2EConfig._
 
+import levin.GrammarInference._
+import levin.IteratedBruteforce._
+
 object S2EGenerateGrammar {
 
   def writeFile(path : String, contents : String) {
@@ -15,6 +18,28 @@ object S2EGenerateGrammar {
     fw.write(contents)
     fw.close
       }
+
+  def learningLoop(length : Int, maxLength : Int ,config : S2EConfig = parseYAMLConfig("./src/main/resources/config.yml")) = {
+    val initLoc = "./cache/" + levinConf.Executable + "/init-" + length.toString + "/"
+    if (Files.exists(Paths.get(initLoc))) {
+      println ("Cached results for execution found. Skipping")
+    } else {
+      init(length, config)
+    }
+
+    val ig = generateInitialGrammar("./cache/" + levinConf.Executable + "/init-" + length.toString + "/")
+
+    for (i <- length+1 to maxLength){
+      val iterLoc = "./cache/" + levinConf.Executable + "/iter-" + i.toString + "/"
+
+      if (Files.exists(Paths.get(iterLoc))) {
+        println ("Cached results for execution found. Skipping")
+      } else {
+        val disj = disjunctTermsByPerm(ig)
+        val newG =  runS2E(i, config, disj.toSeq(0))
+      }
+    }
+  }
 
   // Does the first run
   def init(length : Int, config : S2EConfig = parseYAMLConfig("./src/main/resources/config.yml")) {
