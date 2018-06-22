@@ -19,32 +19,30 @@ import cats.Semigroup
 import cats.implicits._
 
 object GrammarInference {
-  var t = new scala.collection.mutable.HashMap[List[Tuple2[Int, Int]], String]
+  // var t = new scala.collection.mutable.HashMap[List[Tuple2[Int, Int]], String]
 
-  def mapToSequenceG (m : List[List[Tuple2[Int, Int]]]) = {
-    val seq = m
-    SequenceG(seq.map(g => NameG(getName(g))))
+  def mapToSequenceG (m : List[List[Tuple2[Int, Int]]], t: Map[String, List[Tuple2[Int, Int]]]) = {
+    SequenceG(m.map(g => NameG(getName(g, t))))
   }
 
-  def buildTerminalMap(gvec : List[Map[Int, List[Tuple2[Int, Int]]]]) : Map[String, List[Tuple2[Int, Int]]] = {
-    var tM = new scala.collection.mutable.HashMap[List[Tuple2[Int, Int]], String]
-
-    for (g <- gvec) {
-      for (v <- g.values) {
-        tM += (v -> generateNewName2(v, tM.toMap))
-      }
+  def buildTerminalMap(gvec : List[List[Tuple2[Int, Int]]]) : Map[String, List[Tuple2[Int, Int]]] = {
+    var tM = new scala.collection.mutable.HashMap[String, List[Tuple2[Int, Int]]]
+    for (g <- gvec.distinct) {
+      tM += (generateNewName(g, tM.toMap) -> g)
     }
 
-   tM.toMap.map(_.swap).toMap
+   tM.toMap
   }
 
-  def mapToAlternativeG (m : List[List[List[Tuple2[Int, Int]]]]) = {
-    AlternativeG(m.map(mapToSequenceG).toSet)
+  def mapToAlternativeG (m : List[List[List[Tuple2[Int, Int]]]], t: Map[String, List[Tuple2[Int, Int]]]) = {
+    AlternativeG(m.map(mapToSequenceG(_, t)).toSet)
   }
 
   def generateInitialGrammar (constraintDir : String = levinConf.SMT2ConstraintDir) = {
-    val expr = mapToAlternativeG(buildGrammarVec(constraintDir))
-    val tM = t.map(_.swap).toMap
+    val grammarVector = buildGrammarVec(constraintDir)
+    val tM = buildTerminalMap(grammarVector.flatten)
+
+    val expr = mapToAlternativeG(grammarVector, tM)
     Grammar(Map("Expr" -> expr), tM)
   }
 
@@ -72,7 +70,6 @@ object GrammarInference {
     }
     edgeMap.groupBy(_._2).mapValues(_.keys.toSeq).values // TODO: Break this down into multiple steps
   }
-
 
   // s needs to have atleast 2 elements or sliding throws an error
   def countEdges (s : Seq[Gram]) = {
@@ -152,36 +149,26 @@ object GrammarInference {
       case SequenceG(grams) => SequenceG (grams.map {x => substituteTerms(x, f)})
       case LoopG (gram) => LoopG (substituteTerms(gram, f))
       case OptionalG (gram) => OptionalG (substituteTerms(gram, f))
-
     }
   }
 
-  def getName (f : List[Tuple2[Int, Int]]) = {
+  def getName (f : List[Tuple2[Int, Int]], t : Map[String, List[Tuple2[Int, Int]]]) : String = {
     val sorted_f = f.sorted
-    t.get(sorted_f).getOrElse(generateNewName(sorted_f))
-  }
+    val oldName = t.find(_._2 == sorted_f)
 
-  def generateNewName2(f: List[Tuple2[Int, Int]], t : Map[List[Tuple2[Int, Int]], String]) = {
-    val taken = t.values.toList.sorted
-    if (taken.isEmpty){
-      "g0"
-    } else {
-      val n = taken.last.filter(_.isDigit).toInt
-      val newname = "g" + (n + 1).toString
-      newname
+    oldName match {
+      case Some ((x, _)) => x
+      case None => generateNewName(sorted_f, t)
     }
   }
 
-
-  def generateNewName(f: List[Tuple2[Int, Int]]) = {
-    val taken = t.values.toList.sorted
+  def generateNewName(f: List[Tuple2[Int, Int]], t : Map[String, List[Tuple2[Int, Int]]]) : String = {
+    val taken = t.keys.toList.sorted
     if (taken.isEmpty){
-      t += (f -> "g0")
       "g0"
     } else {
       val n = taken.last.filter(_.isDigit).toInt
       val newname = "g" + (n + 1).toString
-      t += (f -> newname)
       newname
     }
   }
