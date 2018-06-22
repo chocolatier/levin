@@ -186,26 +186,6 @@ object GrammarInference {
     }
   }
 
-  def simplifyGrammarVec (stateConstList : List[(Int,Map[Int, List[Tuple2[Int, Int]]])], disjunctableStates : List[List[Int]] ) = {
-      val stateConstMap = stateConstList.toMap
-
-      var simplifiedConstList = scala.collection.mutable.ListBuffer.empty[Map[Int, List[Tuple2[Int, Int]]]]
-
-      for (disjStates <- disjunctableStates){
-        val disjunctableMaps = stateConstMap.filterKeys(disjStates.contains(_)).values
-        simplifiedConstList += disjunctableMaps.reduceLeft(mergeStateTypeMaps)
-      }
-
-      val disjunctableStateList = disjunctableStates.flatten
-      val nonDisjStates = stateConstMap.filterKeys(!disjunctableStateList.contains(_)).values
-
-      for (v <- nonDisjStates){
-        simplifiedConstList += v
-      }
-
-      simplifiedConstList
-  }
-
   def mergeStateTypeMaps (a : Map[Int, List[Tuple2[Int, Int]]], b : Map[Int, List[Tuple2[Int, Int]]]) = {
     a ++ b.map {
       case (id, xs) => id -> (xs.union(a.getOrElse(id, List[Tuple2[Int,Int]]())).distinct)
