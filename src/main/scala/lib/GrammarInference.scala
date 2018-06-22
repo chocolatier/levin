@@ -225,6 +225,52 @@ object GrammarInference {
     stateConstList
   }
 
+  /** Constructs a vector containing the terminals for the given file
+    * Params: file: The SMT2 file describing the constraints for the state
+    * Return: A vector consisting of each of the terminals
+    */
+  def constructTerminalVector (file : File) : List[List[Tuple2[Int, Int]]] = {
+    var ctx = scala.collection.mutable.ListBuffer.empty[Command]
+    val is = new java.io.FileReader(file)
+    val lexer = new smtlib.lexer.Lexer(is)
+    val parser = new smtlib.parser.Parser(lexer)
+
+    var cmd = parser.parseCommand
+
+    var rv = List[List[Tuple2[Int, Int]]]()
+
+    // Parse the SMT2 File. When it comes across a function declaration (i.e. a
+    // bitvector) we check which type each byte is constrainted to.
+    while (cmd != null) {
+      cmd match {
+        case DeclareFun (f, g, h) => {
+          ctx += cmd
+          cmd = parser.parseCommand
+          cmd match {
+            case Assert (x) => {
+              // Constraint 0 will always be the null byte
+              val maxIndex =
+                if (file.getName contains "constraints-0.smt2"){
+                  0
+                } else {
+                  inferMaxIndex(x)
+                }
+
+              for (i <- maxIndex to 0) {
+                val m = inferType(buildbvSelect(f,i), x, ctx)
+                rv = m::rv
+                }
+              }
+            case _ => {}
+          }
+        }
+        case _ => ctx += cmd
+      }
+      cmd = parser.parseCommand
+    }
+    rv
+  }
+
   def constructStateTypeMap (file : File) = {
     var ctx = scala.collection.mutable.ListBuffer.empty[Command]
     val is = new java.io.FileReader(file)
