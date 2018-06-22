@@ -1,5 +1,8 @@
 package levin
 
+import sys.process._
+import scala.language.postfixOps
+
 import levin.GrammarInference._
 import levin.GrammarMutator._
 
@@ -13,6 +16,15 @@ import levin.LStar._
 
 object cli {
   def main(args: Array[String]) : Unit = {
+
+    // From https://stackoverflow.com/questions/24964480/kill-a-sys-process-when-the-scala-process-dies
+    // As noted there, this is NOT guaranteed to run.
+    // Kill S2E On Shutdown
+    sys addShutdownHook {
+       println("Caught shutdown, killing S2E")
+       val ev = "killall -9 qemu-system-i386".!
+       println(s"Process finished in shutdown hook with code $ev")
+    }
 
     // Load configuration details
     // TODO: Figure out how to make config globally available in immutable form
@@ -44,7 +56,6 @@ object cli {
     // println (cfg)
     // fw.write(cfg)
     // fw.close
-
 
     val grammarVector = buildGrammarVec("./cache/" + levinConf.Executable + "/init-3/")
 
