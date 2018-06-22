@@ -154,7 +154,7 @@ object GrammarInference {
 
   def getName (f : List[Tuple2[Int, Int]], t : Map[String, List[Tuple2[Int, Int]]]) : String = {
     val sorted_f = f.sorted
-    val oldName = t.find(_._2 == sorted_f)
+    val oldName = t.find(_._2.sorted == sorted_f)
 
     oldName match {
       case Some ((x, _)) => x
@@ -181,7 +181,6 @@ object GrammarInference {
 
   def buildGrammarVec (path : String) : List[List[List[Tuple2[Int, Int]]]]= {
     val files  = new File(path).listFiles.filter {case x => x.getName.endsWith(".smt2") && x.getName.head == 's'}
-
     files.map(constructTerminalVector(_)).toList
   }
 
@@ -216,7 +215,7 @@ object GrammarInference {
                   inferMaxIndex(x)
                 }
 
-              for (i <- maxIndex to 0) {
+              for (i <- (0 to  maxIndex).reverse) {
                 val m = inferType(buildbvSelect(f,i), x, ctx)
                 rv = m::rv
                 }
@@ -228,6 +227,7 @@ object GrammarInference {
       }
       cmd = parser.parseCommand
     }
+
     rv
   }
 
