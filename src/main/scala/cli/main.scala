@@ -48,7 +48,7 @@ object cli {
 
     val grammarVector = buildGrammarVec("./cache/" + levinConf.Executable + "/init-3/")
 
-    println(grammarVector.getClass)
+    println(grammarVector)
     // Testing Garbage
     // val ig = generateInitialGrammar("./cache/" + levinConf.Executable + "/init-3/")
     // val s = lStar(ig.terminalMap)

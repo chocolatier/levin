@@ -24,7 +24,9 @@ object S2EGenerateGrammar {
     if (Files.exists(Paths.get(initLoc))) {
       println ("Cached results for execution found. Skipping")
     } else {
+      Files.createDirectories(Paths.get(initLoc))
       init(length, config)
+      kqueryToSMT2(length, "./cache/" + levinConf.Executable + "/init-" + length.toString + "/")
     }
 
     val ig = generateInitialGrammar("./cache/" + levinConf.Executable + "/init-" + length.toString + "/")
@@ -35,6 +37,7 @@ object S2EGenerateGrammar {
       if (Files.exists(Paths.get(iterLoc))) {
         println ("Cached results for execution found. Skipping")
       } else {
+        Files.createDirectories(Paths.get(iterLoc))
         val disj = disjunctTermsByPerm(ig)
         val newG =  runS2E(i, config, disj.toSeq(0))
       }
@@ -53,6 +56,8 @@ object S2EGenerateGrammar {
     val s = sys.process.Process(Seq("./launch-s2e.sh"), new java.io.File(levinConf.ProjectLocation))!;
   }
 
+  /** Converts the kquery files to SMT2
+   */
   def kqueryToSMT2(length : Int, writedir: String ,s2eoutdir : String = "s2e-last/") {
 
     println("Converting kq to kquery")
