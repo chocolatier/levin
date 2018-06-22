@@ -14,6 +14,8 @@ import levin.S2EGenerateGrammar._
 
 import levin.LStar._
 
+import levin.automata.Automaton._
+
 object cli {
   def main(args: Array[String]) : Unit = {
 
@@ -46,7 +48,7 @@ object cli {
     // kqueryToSMT2(3, "./cache/" + levinConf.Executable + "/init-3/")
 
     val v = parseYAMLConfig("./src/main/resources/config.yml")
-    learningLoop(3,4,v)
+    // learningLoop(3,4,v)
     // // val cfg = (generateConfigFile(v))
     // val cfgu = updatePluginsConfig(v.plugins, "AddEqualityRestriction", "eqVector", "{97, 98, 99}")
     //
@@ -58,8 +60,10 @@ object cli {
     // fw.close
 
     val grammarVector = buildGrammarVec("./cache/" + levinConf.Executable + "/init-3/")
+    val tM = buildTerminalMap(grammarVector.flatten)
+    val sentences = grammarVector.map {case x => x.map {case y => tM.find(_._2.sorted == y.sorted).get._1}}.toSet
+    println (buildInitialAutomaton(sentences))
 
-    println(grammarVector)
     // Testing Garbage
     // val ig = generateInitialGrammar("./cache/" + levinConf.Executable + "/init-3/")
     // val s = lStar(ig.terminalMap)
