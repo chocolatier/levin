@@ -49,7 +49,7 @@ object IteratedBruteforce {
 
       kqueryToSMT2(length, kqueryDir)
 
-      for ((_,gvec) <- buildGrammarVec(kqueryDir)){
+      for (gvec <- buildGrammarVec(kqueryDir)){
         val oldExprMap = newGrammar.exprMap
         val oldExpr = oldExprMap("Expr")
 

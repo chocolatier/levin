@@ -21,9 +21,9 @@ import cats.implicits._
 object GrammarInference {
   var t = new scala.collection.mutable.HashMap[List[Tuple2[Int, Int]], String]
 
-  def mapToSequenceG (m : Map[Int, List[Tuple2[Int, Int]]]) = {
-    val seq = m.toSeq.sortBy(_._1)
-    SequenceG(seq.map(g => NameG(getName(g._2))))
+  def mapToSequenceG (m : List[List[Tuple2[Int, Int]]]) = {
+    val seq = m
+    SequenceG(seq.map(g => NameG(getName(g))))
   }
 
   def buildTerminalMap(gvec : List[Map[Int, List[Tuple2[Int, Int]]]]) : Map[String, List[Tuple2[Int, Int]]] = {
@@ -38,12 +38,12 @@ object GrammarInference {
    tM.toMap.map(_.swap).toMap
   }
 
-  def mapToAlternativeG (m : List[Map[Int, List[Tuple2[Int, Int]]]]) = {
+  def mapToAlternativeG (m : List[List[List[Tuple2[Int, Int]]]]) = {
     AlternativeG(m.map(mapToSequenceG).toSet)
   }
 
   def generateInitialGrammar (constraintDir : String = levinConf.SMT2ConstraintDir) = {
-    val expr = mapToAlternativeG(buildGrammarVec(constraintDir).map(_._2).toList)
+    val expr = mapToAlternativeG(buildGrammarVec(constraintDir))
     val tM = t.map(_.swap).toMap
     Grammar(Map("Expr" -> expr), tM)
   }
@@ -212,17 +212,10 @@ object GrammarInference {
     }
   }
 
-  def buildGrammarVec (path : String) = {
+  def buildGrammarVec (path : String) : List[List[List[Tuple2[Int, Int]]]]= {
     val files  = new File(path).listFiles.filter {case x => x.getName.endsWith(".smt2") && x.getName.head == 's'}
-    var list = scala.collection.mutable.ListBuffer.empty[Seq[Term]]
 
-    var stateConstList = scala.collection.mutable.ListBuffer.empty[(Int,Map[Int, List[Tuple2[Int, Int]]])]
-
-    for (file <- files) {
-      println("processing " + file)
-      stateConstList += constructStateTypeMap(file)
-    }
-    stateConstList
+    files.map(constructTerminalVector(_)).toList
   }
 
   /** Constructs a vector containing the terminals for the given file
@@ -269,46 +262,6 @@ object GrammarInference {
       cmd = parser.parseCommand
     }
     rv
-  }
-
-  def constructStateTypeMap (file : File) = {
-    var ctx = scala.collection.mutable.ListBuffer.empty[Command]
-    val is = new java.io.FileReader(file)
-    val lexer = new smtlib.lexer.Lexer(is)
-    val parser = new smtlib.parser.Parser(lexer)
-
-    var cmd = parser.parseCommand
-
-    var stateTypeMap = new scala.collection.mutable.HashMap[Int, List[Tuple2[Int, Int]]]
-
-    while (cmd != null) {
-      cmd match {
-        case DeclareFun (f, g, h) => {
-          ctx += cmd
-          cmd = parser.parseCommand
-          cmd match {
-            case Assert (x) => {
-
-              val maxIndex =
-                if (file.getName contains "constraints-0.smt2"){
-                  0
-                } else {
-                  inferMaxIndex(x)
-                }
-
-              for (i <- 0 to maxIndex) {
-                val m = inferType(buildbvSelect(f,i), x, ctx)
-                stateTypeMap += (i -> m)
-                }
-              }
-            case _ => {}
-          }
-        }
-        case _ => ctx += cmd
-      }
-      cmd = parser.parseCommand
-    }
-    Tuple2(constraintNameToID(file.getName), stateTypeMap.toMap)
   }
 
   def constraintNameToID(name : String) = {
