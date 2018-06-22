@@ -62,7 +62,10 @@ object cli {
     val grammarVector = buildGrammarVec("./cache/" + levinConf.Executable + "/init-3/")
     val tM = buildTerminalMap(grammarVector.flatten)
     val sentences = grammarVector.map {case x => x.map {case y => tM.find(_._2.sorted == y.sorted).get._1}}.toSet
-    println (buildInitialAutomaton(sentences))
+    val automaton = buildInitialAutomaton(sentences)
+    // println (automaton)
+    println(tM)
+    println (automaton.states.filter(_._1 == "Start").map(_._2).map(_.transitionMap).map(_.values).map(_.map(tM(_)).map(_(0)._1.toChar)))
 
     // Testing Garbage
     // val ig = generateInitialGrammar("./cache/" + levinConf.Executable + "/init-3/")
