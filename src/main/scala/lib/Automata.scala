@@ -37,4 +37,29 @@ object Automaton {
   def lookupState(name : String, automaton: Automaton) : State = {
     automaton.states.get(name).getOrElse(State(name, Map()))
   }
+
+  /** Counts the number of nodes that lead into a particular state
+    */
+  def inEdges(a : Automaton, s : State) : Int = {
+    var rv = 0
+    for (state <- a.states.values) {
+      if (state.transitionMap.values.toList contains s.name) {
+        rv += 1
+      }
+    }
+    rv
+  }
+
+  /* Counts the number of nodes a state can lead to.
+   */
+  def outEdges(s : State) = {
+    s.transitionMap.size
+  }
+
+  /* Groups the nodes of the automaton
+   */
+  def groupStates (a : Automaton, s : State) = {
+    val numEdges = a.states.map {case x => (x, (inEdges(a,s), outEdges(s)))}
+    numEdges.groupBy(_._2)
+  }
 }
